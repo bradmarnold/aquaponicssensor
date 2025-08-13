@@ -25,6 +25,12 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       padding: 20px;
+      /* Give each chart container a fixed height so Chart.js knows how tall to render the canvas.
+         The position: relative property allows Chart.js to absolutely position its internal
+         canvas element within the container. Without a fixed height the charts would collapse to
+         zero height on GitHub Pages. */
+      height: 300px;
+      position: relative;
     }
   </style>
 </head>
@@ -51,18 +57,20 @@
       return data;
     }
 
-    function prepareSeries(data, key) {
-      return data.map(pt => ({ x: new Date(pt.timestamp), y: pt[key] }));
-    }
-
-    function createChart(ctx, label, data, yLabel) {
+    // Create a line chart using simple category labels on the x-axis.  Chart.js
+    // automatically uses the provided labels array for the category scale.  We
+    // avoid the time scale entirely to remove the dependency on an external date
+    // adapter (e.g. moment or date‑fns).  The y-axis title is provided via
+    // the yLabel parameter.
+    function createChart(ctx, label, labels, values, yLabel) {
       return new Chart(ctx, {
         type: 'line',
         data: {
+          labels: labels,
           datasets: [
             {
               label: label,
-              data: data,
+              data: values,
               fill: false,
               tension: 0.1
             }
@@ -72,16 +80,6 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: {
-              type: 'time',
-              time: {
-                unit: 'day'
-              },
-              title: {
-                display: true,
-                text: 'Date'
-              }
-            },
             y: {
               title: {
                 display: true,
@@ -104,33 +102,45 @@
         // keep only last 7 days
         const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const data = rawData.filter(pt => new Date(pt.timestamp) >= cutoff);
+        // sort by timestamp ascending
         data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-        const phSeries = prepareSeries(data, 'ph');
-        const tdsSeries = prepareSeries(data, 'tds');
-        const tempSeries = prepareSeries(data, 'temp_c');
+        // Prepare labels and values for each metric.  Use ISO strings or locale
+        // strings as labels so the x-axis displays human‑readable timestamps.
+        const labels = data.map(pt => {
+          const d = new Date(pt.timestamp);
+          // Format as month/day and time; adjust as needed
+          return d.toLocaleString();
+        });
+        const phValues = data.map(pt => pt.ph);
+        const tdsValues = data.map(pt => pt.tds);
+        const tempValues = data.map(pt => pt.temp_c);
 
         // destroy existing charts if they exist
         if (window.phChartInstance) window.phChartInstance.destroy();
         if (window.tdsChartInstance) window.tdsChartInstance.destroy();
         if (window.tempChartInstance) window.tempChartInstance.destroy();
 
+        // Create charts with new data
         window.phChartInstance = createChart(
           document.getElementById('phChart').getContext('2d'),
           'pH',
-          phSeries,
+          labels,
+          phValues,
           'pH value'
         );
         window.tdsChartInstance = createChart(
           document.getElementById('tdsChart').getContext('2d'),
           'TDS (ppm)',
-          tdsSeries,
+          labels,
+          tdsValues,
           'TDS (ppm)'
         );
         window.tempChartInstance = createChart(
           document.getElementById('tempChart').getContext('2d'),
           'Water Temperature (°C)',
-          tempSeries,
+          labels,
+          tempValues,
           'Temperature (°C)'
         );
       } catch (e) {
