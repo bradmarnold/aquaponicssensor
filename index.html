@@ -9,63 +9,54 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --bg-top:#0f172a;       /* slate-900 */
-      --bg-btm:#1e293b;       /* slate-800 */
-      --card:#0b1220cc;       /* translucent glass */
-      --card-border:#23324a;  /* subtle border */
-      --text:#e5e7eb;         /* light */
-      --muted:#94a3b8;        /* slate-400 */
+      --bg:#f8fafc;             /* light background */
+      --card:#ffffff;           /* card surface */
+      --card-border:#e5e7eb;    /* subtle border */
+      --text:#0f172a;           /* main text */
+      --muted:#64748b;          /* secondary text */
 
-      /* brand colors */
-      --ph:#f472b6;     /* pink-400 */
-      --ph-fill:#f472b640;
-      --tds:#38bdf8;    /* sky-400 */
-      --tds-fill:#38bdf840;
-      --temp:#f59e0b;   /* amber-500 */
-      --temp-fill:#f59e0b40;
+      /* series colors */
+      --ph:#e11d48;       /* rose-600 */
+      --ph-fill:#e11d4826;
+      --tds:#0284c7;      /* sky-600 */
+      --tds-fill:#0284c726;
+      --temp:#d97706;     /* amber-600 */
+      --temp-fill:#d9770626;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background: radial-gradient(1200px 800px at 20% 0%, #1b2a44 0%, transparent 55%),
-                  linear-gradient(180deg, var(--bg-top), var(--bg-btm));
-      background-attachment: fixed;
-      padding: 24px;
+      color:var(--text); background:var(--bg); padding:24px;
     }
-    header{
-      display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; margin-bottom: 18px;
-    }
+    header{display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; margin-bottom: 18px;}
     h1{margin:0; font-size:28px; letter-spacing:0.3px}
     .note{color:var(--muted); font-size:13px}
-    .bar{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
+    .bar{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
     .chip{
-      padding:8px 12px; border-radius:999px; background:#0b1220aa; border:1px solid var(--card-border);
+      padding:8px 12px; border-radius:999px; background:#ffffff; border:1px solid var(--card-border);
       font-size:13px; display:inline-flex; align-items:center; gap:8px;
-      box-shadow:0 8px 24px rgba(0,0,0,.25), inset 0 0 0 9999px rgba(255,255,255,.02);
-      backdrop-filter: blur(6px);
+      box-shadow:0 6px 18px rgba(2,6,23,.08);
     }
     .dot{width:10px; height:10px; border-radius:999px; display:inline-block}
     .dot.ph{background:var(--ph)} .dot.tds{background:var(--tds)} .dot.temp{background:var(--temp)}
 
-    h2{margin:22px 0 10px; font-size:18px; color:#c7d2fe; letter-spacing:.3px}
-    .grid{
-      display:grid; gap:16px;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    }
+    h2{margin:22px 0 10px; font-size:18px; color:#111827; letter-spacing:.3px}
+    .grid{display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));}
     .card{
       background:var(--card); border:1px solid var(--card-border); border-radius:16px; padding:14px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+      box-shadow:0 10px 30px rgba(2,6,23,.06);
       min-height:320px; display:flex; flex-direction:column; justify-content:space-between;
     }
-    .card h3{margin:0 0 10px; font-size:14px; color:#cbd5e1; font-weight:600}
-    canvas{width:100%; height:260px}
+    .card h3{margin:0 0 10px; font-size:14px; color:#1f2937; font-weight:600}
+
+    /* FIX: give charts a stable box; canvas fills it */
+    .chartbox{ position:relative; height:260px; width:100%; }
+    canvas{ display:block; width:100%; height:100%; }
+
     footer{margin-top:26px; color:var(--muted); font-size:12px}
-    a{color:#93c5fd}
-    .err{color:#fecaca}
+    a{color:#0369a1}
+    .err{color:#b91c1c}
   </style>
 </head>
 <body>
@@ -79,179 +70,4 @@
 
   <h2>Last 7 Days — Raw Readings</h2>
   <div class="grid">
-    <div class="card"><h3>pH (raw)</h3><canvas id="ph7"></canvas></div>
-    <div class="card"><h3>TDS (ppm, raw)</h3><canvas id="tds7"></canvas></div>
-    <div class="card"><h3>Water Temp (°C, raw)</h3><canvas id="temp7"></canvas></div>
-  </div>
-
-  <h2>Last 30 Days — Daily Averages</h2>
-  <div class="grid">
-    <div class="card"><h3>Daily Avg pH</h3><canvas id="ph30"></canvas></div>
-    <div class="card"><h3>Daily Avg TDS (ppm)</h3><canvas id="tds30"></canvas></div>
-    <div class="card"><h3>Daily Avg Temp (°C)</h3><canvas id="temp30"></canvas></div>
-  </div>
-
-  <footer>
-    Tip: Keep at least 30–60 days of data on the Pi (e.g., <code>WINDOW_DAYS=60</code>) so the daily-average charts stay full.
-  </footer>
-
-  <script>
-    document.getElementById('ts').textContent = new Date().toLocaleString();
-
-    const MS_DAY = 24*60*60*1000;
-    const now = new Date();
-    const cutoff7  = new Date(now.getTime() - 7*MS_DAY);
-    const cutoff30 = new Date(now.getTime() - 30*MS_DAY);
-
-    const palette = {
-      ph:   { stroke:getCss('--ph'),   fill:getCss('--ph-fill') },
-      tds:  { stroke:getCss('--tds'),  fill:getCss('--tds-fill') },
-      temp: { stroke:getCss('--temp'), fill:getCss('--temp-fill') }
-    };
-
-    function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-
-    async function loadData(){
-      const url = 'data.json?nocache=' + Date.now();
-      const r = await fetch(url);
-      if(!r.ok) throw new Error('Failed to load data.json');
-      const rows = await r.json();
-      // Normalize rows
-      return rows.map(r=>({
-        t: new Date(r.timestamp),
-        ph:  (typeof r.ph  === 'number') ? r.ph  : null,
-        tds: (typeof r.tds === 'number') ? r.tds : null,
-        temp:(typeof (r.temp_c ?? r.temp) === 'number') ? (r.temp_c ?? r.temp) : null
-      })).filter(x=>!isNaN(x.t));
-    }
-
-    function showLatestChips(rows){
-      if(!rows.length) return;
-      const last = rows.reduce((a,b)=> a.t>b.t? a : b);
-      const el = document.getElementById('latestChips');
-      el.innerHTML = `
-        <span class="chip"><span class="dot ph"></span><strong>pH:</strong> ${fmt(last.ph,3)}</span>
-        <span class="chip"><span class="dot tds"></span><strong>TDS:</strong> ${fmt(last.tds,1)} ppm</span>
-        <span class="chip"><span class="dot temp"></span><strong>Temp:</strong> ${fmt(last.temp,2)} °C</span>
-      `;
-    }
-
-    function fmt(v,dec=2){ return (v==null || isNaN(v)) ? '—' : Number(v).toFixed(dec); }
-    const iso = d => d.toISOString();
-
-    function seriesLast7(rows){
-      const f = rows.filter(r=> r.t >= cutoff7).sort((a,b)=>a.t-b.t);
-      return {
-        labels: f.map(r=> iso(r.t)),
-        ph:  f.map(r=> r.ph),
-        tds: f.map(r=> r.tds),
-        temp:f.map(r=> r.temp),
-      };
-    }
-
-    function dailyAveragesLast30(rows){
-      const buckets = new Map(); // yyyy-mm-dd -> {sum,count} per metric
-      for(const r of rows){
-        if(r.t < cutoff30) continue;
-        const d = new Date(Date.UTC(r.t.getUTCFullYear(), r.t.getUTCMonth(), r.t.getUTCDate()));
-        const key = d.toISOString().slice(0,10);
-        if(!buckets.has(key)) buckets.set(key, {ph:{s:0,c:0}, tds:{s:0,c:0}, temp:{s:0,c:0}});
-        const b = buckets.get(key);
-        if(typeof r.ph  === 'number'){ b.ph.s  += r.ph;  b.ph.c++; }
-        if(typeof r.tds === 'number'){ b.tds.s += r.tds; b.tds.c++; }
-        if(typeof r.temp=== 'number'){ b.temp.s+= r.temp; b.temp.c++; }
-      }
-      const days = Array.from(buckets.keys()).sort();
-      return {
-        labels:days,
-        ph:   days.map(k=> avg(buckets.get(k).ph,3)),
-        tds:  days.map(k=> avg(buckets.get(k).tds,1)),
-        temp: days.map(k=> avg(buckets.get(k).temp,2)),
-      };
-    }
-    function avg(o,dec){ return o.c? +((o.s/o.c).toFixed(dec)) : null; }
-
-    function makeGradient(ctx, area, colorTop, colorBtm){
-      const g = ctx.createLinearGradient(0, area.top, 0, area.bottom);
-      g.addColorStop(0, colorTop);
-      g.addColorStop(1, colorBtm);
-      return g;
-    }
-
-    function lineChart(canvasId, label, labels, data, colors){
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-
-      // Use scriptable backgroundColor to build gradient after chartArea is known
-      return new Chart(ctx, {
-        type:'line',
-        data:{
-          labels,
-          datasets:[{
-            label,
-            data,
-            borderColor: colors.stroke,
-            backgroundColor: (c)=>{
-              const {chart} = c; const area = chart.chartArea;
-              if(!area) return colors.fill; // initial
-              return makeGradient(chart.ctx, area, colors.fill, 'rgba(0,0,0,0)');
-            },
-            fill:true,
-            borderWidth:2,
-            pointRadius:0,
-            tension:0.3
-          }]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          animation:{ duration:700, easing:'easeOutQuart' },
-          interaction:{ mode:'nearest', intersect:false },
-          scales:{
-            x:{
-              ticks:{ color:'#94a3b8', maxRotation:0, autoSkip:true },
-              grid:{ color:'rgba(255,255,255,0.05)' }
-            },
-            y:{
-              ticks:{ color:'#94a3b8' },
-              grid:{ color:'rgba(255,255,255,0.05)' }
-            }
-          },
-          plugins:{
-            legend:{ labels:{ color:'#cbd5e1' }},
-            tooltip:{
-              backgroundColor:'#0b1220', titleColor:'#e5e7eb', bodyColor:'#e5e7eb',
-              borderColor:'#23324a', borderWidth:1,
-              callbacks: { label:ctx => `${ctx.dataset.label}: ${ctx.parsed.y}` }
-            }
-          }
-        }
-      });
-    }
-
-    async function init(){
-      try{
-        const rows = await loadData();
-        showLatestChips(rows);
-
-        const s7 = seriesLast7(rows);
-        lineChart('ph7',   'pH',               s7.labels, s7.ph,   palette.ph);
-        lineChart('tds7',  'TDS (ppm)',        s7.labels, s7.tds,  palette.tds);
-        lineChart('temp7', 'Water Temp (°C)',  s7.labels, s7.temp, palette.temp);
-
-        const d30 = dailyAveragesLast30(rows);
-        lineChart('ph30',   'Daily Avg pH',        d30.labels, d30.ph,   palette.ph);
-        lineChart('tds30',  'Daily Avg TDS (ppm)', d30.labels, d30.tds,  palette.tds);
-        lineChart('temp30', 'Daily Avg Temp (°C)', d30.labels, d30.temp, palette.temp);
-      }catch(err){
-        document.body.insertAdjacentHTML('beforeend',
-          `<p class="err">Error loading <code>data.json</code>: ${err.message}</p>`);
-      }
-    }
-    init();
-
-    // Refresh page every 30 minutes (matches your logger cadence)
-    setInterval(()=> location.reload(), 30*60*1000);
-  </script>
-</body>
-</html>
+    <div class="card"><h3>pH (raw)</h3><di
