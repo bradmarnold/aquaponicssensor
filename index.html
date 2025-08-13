@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aquaponics Dashboard</title>
+  <!-- Include Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aquaponics Sensor Dashboard</h1>
+  <div class="chart-container">
+    <canvas id="phChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="tdsChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="tempChart"></canvas>
+  </div>
+  <script>
+    // Set the URL of your JSON data here.  When hosted on GitHub Pages,
+    // this might be something like:
+    // const DATA_URL = 'https://raw.githubusercontent.com/USER/REPO/BRANCH/data.json';
+    const DATA_URL = 'data.json';
+
+    async function fetchData() {
+      const response = await fetch(DATA_URL, { cache: 'no-cache' });
+      const data = await response.json();
+      return data;
+    }
+
+    function prepareSeries(data, key) {
+      return data.map(pt => ({ x: new Date(pt.timestamp), y: pt[key] }));
+    }
+
+    function createChart(ctx, label, data, yLabel) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: label,
+              data: data,
+              fill: false,
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day'
+              },
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: yLabel
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true
+            }
+          }
+        }
+      });
+    }
+
+    async function updateCharts() {
+      try {
+        const rawData = await fetchData();
+        // keep only last 7 days
+        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const data = rawData.filter(pt => new Date(pt.timestamp) >= cutoff);
+        data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        const phSeries = prepareSeries(data, 'ph');
+        const tdsSeries = prepareSeries(data, 'tds');
+        const tempSeries = prepareSeries(data, 'temp_c');
+
+        // destroy existing charts if they exist
+        if (window.phChartInstance) window.phChartInstance.destroy();
+        if (window.tdsChartInstance) window.tdsChartInstance.destroy();
+        if (window.tempChartInstance) window.tempChartInstance.destroy();
+
+        window.phChartInstance = createChart(
+          document.getElementById('phChart').getContext('2d'),
+          'pH',
+          phSeries,
+          'pH value'
+        );
+        window.tdsChartInstance = createChart(
+          document.getElementById('tdsChart').getContext('2d'),
+          'TDS (ppm)',
+          tdsSeries,
+          'TDS (ppm)'
+        );
+        window.tempChartInstance = createChart(
+          document.getElementById('tempChart').getContext('2d'),
+          'Water Temperature (°C)',
+          tempSeries,
+          'Temperature (°C)'
+        );
+      } catch (e) {
+        console.error('Failed to load data', e);
+      }
+    }
+
+    // Initial load
+    updateCharts();
+    // Refresh every 30 minutes (1800000 ms)
+    setInterval(updateCharts, 1800000);
+  </script>
+</body>
+</html>
