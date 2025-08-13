@@ -163,7 +163,7 @@ def load_data() -> list:
     return []
 
 
-def prune_old_data(data: list, days: int = 7) -> list:
+def prune_old_data(data: list, days: int = 60) -> list:
     """Keep only entries within the last `days` days."""
     cutoff = datetime.utcnow() - timedelta(days=days)
     pruned = []
