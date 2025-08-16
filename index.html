@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aquaponics Dashboard</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js?v=4.4.3"></script>
   <style>
     :root{
       --bg:#f8fafc;             /* light background */
@@ -57,6 +60,16 @@
     footer{margin-top:26px; color:var(--muted); font-size:12px}
     a{color:#0369a1}
     .err{color:#b91c1c}
+
+    /* Water Coach card */
+    #coach{ position:fixed; right:16px; bottom:16px; z-index:50; max-width:360px;
+      background:#fff; border:1px solid var(--card-border); border-radius:12px;
+      box-shadow:0 10px 30px rgba(2,6,23,.10); padding:12px; font: 13px/1.4 Inter, system-ui;}
+    #coach .badge{ display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--card-border); margin-left:8px;}
+    #coach .badge.ok{ background:#e8f5e9; color:#166534; border-color:#bbf7d0;}
+    #coach .badge.watch{ background:#fff7ed; color:#a16207; border-color:#fde68a;}
+    #coach .badge.alert{ background:#fef2f2; color:#991b1b; border-color:#fecaca;}
+    #coach ul{ margin:6px 0 0; padding-left:18px;}
   </style>
 </head>
 <body>
@@ -85,6 +98,15 @@
   <footer>
     Keep at least 30–60 days of data on the Pi (<code>WINDOW_DAYS=60</code>) so daily-average charts stay full.
   </footer>
+
+  <!-- Water Coach panel -->
+  <div id="coach" role="complementary" aria-label="Water Coach">
+    <div style="font-weight:600; margin-bottom:6px;">
+      Water Coach <span id="coach-status" class="badge">loading…</span>
+    </div>
+    <div id="coach-ts" style="color:#64748b; font-size:12px; margin-bottom:8px;">…</div>
+    <div id="coach-body">Loading advice…</div>
+  </div>
 
   <script>
     document.getElementById('ts').textContent = new Date().toLocaleString();
@@ -212,7 +234,38 @@
       return chart;
     }
 
-    async function init(){
+    async function loadCoach(){
+      const statusEl = document.getElementById('coach-status');
+      const tsEl = document.getElementById('coach-ts');
+      const bodyEl = document.getElementById('coach-body');
+      try{
+        const r = await fetch('coach.json?nocache=' + Date.now());
+        if(!r.ok) throw new Error('no coach.json yet');
+        const c = await r.json();
+        const st = (c.status||'ok').toLowerCase();
+        statusEl.textContent = st;
+        statusEl.className = 'badge ' + st;
+        tsEl.textContent = `Updated: ${new Date(c.timestamp||Date.now()).toLocaleString()}`;
+        let html = '';
+        if (c.summary) html += `<p style="margin:0 0 6px">${c.summary}</p>`;
+        if (Array.isArray(c.insights) && c.insights.length){
+          html += '<ul>';
+          for (const i of c.insights.slice(0,3)) {
+            const m = (i.metric||'').toUpperCase();
+            const rec = i.recommendation || i.trend || '';
+            html += `<li><strong>${m}:</strong> ${rec}</li>`;
+          }
+          html += '</ul>';
+        }
+        bodyEl.innerHTML = html || 'No advice yet.';
+      }catch(e){
+        statusEl.textContent = 'watch'; statusEl.className = 'badge watch';
+        tsEl.textContent = 'Coach not ready. It will appear after the first Pi run.';
+        bodyEl.textContent = 'Waiting for coach.json...';
+      }
+    }
+
+    (async function init(){
       try{
         const rows = await loadData();
         showLatestChips(rows);
@@ -230,11 +283,13 @@
         document.body.insertAdjacentHTML('beforeend',
           `<p class="err">Error loading <code>data.json</code>: ${err.message}</p>`);
       }
-    }
-    init();
+      loadCoach();
+    })();
 
     // Refresh page every 30 minutes (matches your logger cadence)
     setInterval(()=> location.reload(), 30*60*1000);
+    // Refresh coach panel every 30 minutes
+    setInterval(loadCoach, 30*60*1000);
   </script>
 </body>
 </html>
