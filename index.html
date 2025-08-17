@@ -131,12 +131,12 @@
       const r = await fetch(url);
       if(!r.ok) throw new Error('Failed to load data.json');
       const rows = await r.json();
-      // Normalize rows
+      // Normalize rows and map 0 → null so placeholder zeros don't affect charts
       return rows.map(r=>({
         t: new Date(r.timestamp),
-        ph:  (typeof r.ph  === 'number') ? r.ph  : null,
-        tds: (typeof r.tds === 'number') ? r.tds : null,
-        temp:(typeof (r.temp_c ?? r.temp) === 'number') ? (r.temp_c ?? r.temp) : null
+        ph:  (r.ph === 0 ? null : r.ph),
+        tds: (r.tds === 0 ? null : r.tds),  
+        temp:((r.temp_c ?? r.temp) === 0 ? null : (r.temp_c ?? r.temp))
       })).filter(x=>!isNaN(x.t));
     }
 
@@ -239,9 +239,29 @@
       const tsEl = document.getElementById('coach-ts');
       const bodyEl = document.getElementById('coach-body');
       try{
-        const r = await fetch('coach.json?nocache=' + Date.now());
-        if(!r.ok) throw new Error('no coach.json yet');
-        const c = await r.json();
+        // Try coach.json first
+        let r = await fetch('coach.json?nocache=' + Date.now());
+        let c = null;
+        
+        if (r.ok) {
+          c = await r.json();
+        } else {
+          // Fallback to Vercel endpoint if COACH_URL is configured
+          const coachUrl = window.COACH_URL || '/api/coach';
+          if (coachUrl && coachUrl !== '/api/coach') {
+            try {
+              r = await fetch(coachUrl + '?nocache=' + Date.now());
+              if (r.ok) {
+                c = await r.json();
+              }
+            } catch (fallbackError) {
+              console.log('Vercel endpoint also failed:', fallbackError);
+            }
+          }
+        }
+        
+        if (!c) throw new Error('no coach data available');
+        
         const st = (c.status||'ok').toLowerCase();
         statusEl.textContent = st;
         statusEl.className = 'badge ' + st;

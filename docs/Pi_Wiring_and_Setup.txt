@@ -1,0 +1,209 @@
+Pi Wiring and Setup Guide
+=========================
+
+This guide covers the physical wiring and Raspberry Pi setup for the aquaponics monitoring system.
+
+HARDWARE REQUIREMENTS
+---------------------
+- Raspberry Pi 4 Model B (4GB recommended)
+- MicroSD card (32GB minimum, Class 10)
+- DFRobot Gravity pH Kit V2 (SEN0161-V2)
+- DFRobot Gravity TDS Sensor (SEN0244)
+- DFRobot ADS1115 16-bit I²C ADC Module (DFR0553)
+- DFRobot Waterproof DS18B20 Temperature Probe (DFR0198)
+- 4.7 kΩ resistor (1/4W, 1% tolerance)
+- Breadboard and jumper wires
+- 5V 3A USB-C power supply
+
+WIRING DIAGRAM
+--------------
+
+ADS1115 ADC Module:
+  VCC  → Pi 3.3V (Pin 1)
+  GND  → Pi GND (Pin 6)
+  SDA  → Pi GPIO2/SDA (Pin 3)
+  SCL  → Pi GPIO3/SCL (Pin 5)
+  ADDR → Not connected (default address 0x48)
+
+pH Sensor (to ADS1115):
+  Red   → ADS1115 VCC (3.3V)
+  Black → ADS1115 GND
+  Blue  → ADS1115 A0
+
+TDS Sensor (to ADS1115):
+  Red   → ADS1115 VCC (3.3V)
+  Black → ADS1115 GND
+  Yellow → ADS1115 A1
+
+DS18B20 Temperature Probe:
+  Red   → Pi 3.3V (Pin 1)
+  Black → Pi GND (Pin 14)
+  Yellow → Pi GPIO4 (Pin 7)
+  
+  Pull-up Resistor:
+  4.7 kΩ between GPIO4 (Pin 7) and 3.3V (Pin 1)
+
+PIN REFERENCE (Raspberry Pi 4):
+  Pin 1:  3.3V
+  Pin 3:  GPIO2 (SDA)
+  Pin 5:  GPIO3 (SCL)
+  Pin 6:  GND
+  Pin 7:  GPIO4 (1-Wire)
+  Pin 14: GND
+
+RASPBERRY PI OS SETUP
+---------------------
+
+1. Flash Raspberry Pi OS to SD card using Raspberry Pi Imager
+   - Click gear icon for advanced options
+   - Enable SSH
+   - Set username/password
+   - Configure Wi-Fi (SSID and password)
+
+2. Insert SD card and boot Pi
+
+3. Connect via SSH:
+   ssh pi@<pi-ip-address>
+
+4. Update system:
+   sudo apt update && sudo apt upgrade -y
+
+5. Enable I²C and 1-Wire interfaces:
+   sudo raspi-config
+   
+   Navigate to:
+   - Interface Options → I2C → Enable
+   - Interface Options → 1-Wire → Enable
+   
+   Reboot when prompted:
+   sudo reboot
+
+6. Install required system packages:
+   sudo apt install -y python3-pip python3-venv git i2c-tools
+
+VERIFICATION TESTS
+------------------
+
+1. Test I²C connection:
+   i2cdetect -y 1
+   
+   Should show device at address 48 (ADS1115):
+        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+   00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+   10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   40: -- -- -- -- -- -- -- -- 48 -- -- -- -- -- -- --
+   50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   70: -- -- -- -- -- -- -- --
+
+2. Test DS18B20 temperature sensor:
+   ls /sys/bus/w1/devices/
+   
+   Should show a device starting with "28-":
+   28-0123456789ab  w1_bus_master1
+
+   cat /sys/bus/w1/devices/28-*/w1_slave
+   
+   Should show temperature reading:
+   a1 01 4b 46 7f ff 0c 10 4c : crc=4c YES
+   a1 01 4b 46 7f ff 0c 10 4c t=26062
+
+PYTHON ENVIRONMENT SETUP
+-------------------------
+
+1. Clone the repository:
+   git clone https://github.com/your-username/aquaponicssensor.git
+   cd aquaponicssensor
+
+2. Create Python virtual environment:
+   python3 -m venv venv
+   source venv/bin/activate
+
+3. Install Python dependencies:
+   pip install -r pi/requirements.txt
+
+4. Test sensor reading (single reading):
+   cd pi
+   python3 sensor_logger.py --once
+
+   Expected output (values will vary):
+   Aquaponics Sensor Logger
+   ========================================
+   ADS1115 initialized at address 0x48
+   pH sensor on channel 0, TDS sensor on channel 1
+   Taking single reading...
+   Reading: {'timestamp': '2024-01-15T10:30:00Z', 'ph': None, 'tds': None, 'temp_c': 26.1}
+   Saved 1 readings to /home/pi/aquaponicssensor/data.json
+
+CRON SETUP (AUTOMATED LOGGING)
+-------------------------------
+
+1. Edit crontab:
+   crontab -e
+
+2. Before pH sensor arrives (ignore pH readings):
+   # Run every 30 minutes, ignore pH sensor
+   */30 * * * * cd /home/pi/aquaponicssensor && /home/pi/aquaponicssensor/venv/bin/python /home/pi/aquaponicssensor/pi/sensor_logger.py --once
+
+   Or with environment variables:
+   */30 * * * * cd /home/pi/aquaponicssensor && PH_SLOPE=0 PH_INTERCEPT=0 /home/pi/aquaponicssensor/venv/bin/python /home/pi/aquaponicssensor/pi/sensor_logger.py --once
+
+3. After pH calibration (full monitoring):
+   # Full sensor monitoring every 30 minutes
+   */30 * * * * cd /home/pi/aquaponicssensor && WINDOW_DAYS=60 PH_SLOPE=-3.333 PH_INTERCEPT=12.5 TDS_MULTIPLIER=0.5 GIT_PUSH=1 /home/pi/aquaponicssensor/venv/bin/python /home/pi/aquaponicssensor/pi/sensor_logger.py --once
+
+TROUBLESHOOTING
+---------------
+
+1. "No module named 'board'" error:
+   - Ensure you're running on Raspberry Pi with Blinka installed
+   - Check virtual environment is activated
+   - Reinstall: pip install Adafruit-Blinka
+
+2. I²C not working:
+   - Verify I²C is enabled: sudo raspi-config
+   - Check wiring connections
+   - Try different I²C address: ADS1115_ADDR=0x49
+
+3. DS18B20 not found:
+   - Verify 1-Wire is enabled: sudo raspi-config
+   - Check 4.7kΩ pull-up resistor is connected
+   - Check GPIO4 wiring
+
+4. Permission errors:
+   - Ensure user is in i2c group: sudo usermod -a -G i2c pi
+   - Reboot after adding to group
+
+5. pH readings always None:
+   - Check ADC_CH_PH environment variable
+   - Verify pH probe wiring to correct ADS1115 channel
+   - For testing without pH probe: PH_SLOPE=0 PH_INTERCEPT=0
+
+CALIBRATION NOTES
+-----------------
+
+Initial setup (before calibration):
+- Set PH_SLOPE=0 PH_INTERCEPT=0 to disable pH readings
+- TDS_MULTIPLIER=0.5 is reasonable starting point
+- Calibrate sensors before trusting readings
+
+See main README.md for detailed calibration procedures.
+
+POWER MANAGEMENT
+----------------
+
+For 24/7 operation:
+- Use official Raspberry Pi power supply (5V 3A)
+- Consider UPS for power outages
+- Enable auto-restart: Add to /etc/rc.local before "exit 0":
+  (cd /home/pi/aquaponicssensor && sudo -u pi /home/pi/aquaponicssensor/venv/bin/python /home/pi/aquaponicssensor/pi/sensor_logger.py) &
+
+SECURITY
+--------
+
+- Change default passwords
+- Keep system updated: sudo apt update && sudo apt upgrade
+- Consider firewall: sudo ufw enable
+- Use SSH keys instead of passwords for remote access

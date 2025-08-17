@@ -1,0 +1,283 @@
+Connecting Pi to Repository and GitHub Pages
+===========================================
+
+This guide covers Wi-Fi setup, SSH access, GitHub authentication, and enabling 
+GitHub Pages for the aquaponics monitoring dashboard.
+
+WI-FI SETUP OPTIONS
+-------------------
+
+Option 1: Raspberry Pi Imager (Recommended)
+1. Before flashing, click gear icon in Raspberry Pi Imager
+2. Check "Enable SSH" and set username/password
+3. Check "Configure wireless LAN"
+4. Enter your Wi-Fi SSID and password
+5. Flash SD card and boot Pi
+
+Option 2: Headless Setup (wpa_supplicant.conf)
+1. After flashing, create file on SD card boot partition:
+   wpa_supplicant.conf
+
+2. Add Wi-Fi configuration:
+   country=US
+   ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+   update_config=1
+
+   network={
+       ssid="YourWiFiName"
+       psk="YourWiFiPassword"
+   }
+
+3. Create empty file named 'ssh' (no extension) on boot partition
+4. Insert SD card and boot Pi
+
+SSH ACCESS SETUP
+-----------------
+
+1. Find Pi IP address:
+   - Check router admin panel
+   - Use network scanner: nmap -sn 192.168.1.0/24
+   - Or connect monitor/keyboard to Pi and run: hostname -I
+
+2. Connect via SSH:
+   ssh pi@<pi-ip-address>
+   # Or use the username you set in imager
+
+3. For permanent access, consider static IP:
+   sudo nano /etc/dhcpcd.conf
+   
+   Add at end:
+   interface wlan0
+   static ip_address=192.168.1.100/24
+   static routers=192.168.1.1
+   static domain_name_servers=8.8.8.8 8.8.4.4
+
+GITHUB AUTHENTICATION OPTIONS
+------------------------------
+
+Option 1: GitHub CLI (Recommended)
+1. Install GitHub CLI:
+   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+   sudo apt update
+   sudo apt install gh
+
+2. Authenticate:
+   gh auth login
+   
+   Follow prompts:
+   - What account: GitHub.com
+   - Protocol: HTTPS
+   - Authenticate: Login with a web browser
+   - Copy and paste the code in your browser
+
+3. Test authentication:
+   gh auth status
+   gh repo view your-username/aquaponicssensor
+
+Option 2: SSH Key (Advanced Users)
+1. Generate SSH key:
+   ssh-keygen -t ed25519 -C "pi@aquaponics-system"
+   
+2. Add to SSH agent:
+   eval "$(ssh-agent -s)"
+   ssh-add ~/.ssh/id_ed25519
+
+3. Copy public key:
+   cat ~/.ssh/id_ed25519.pub
+
+4. Add to GitHub:
+   - Go to GitHub.com → Settings → SSH and GPG keys
+   - Click "New SSH key"
+   - Paste the public key content
+
+5. Test connection:
+   ssh -T git@github.com
+
+Option 3: Personal Access Token (Less Secure)
+1. Create token at GitHub.com:
+   - Settings → Developer settings → Personal access tokens
+   - Generate new token (classic)
+   - Scopes: repo, workflow
+
+2. Configure Git credential helper:
+   git config --global credential.helper store
+   git config --global user.name "Your Name"
+   git config --global user.email "your-email@example.com"
+
+3. Clone repo (will prompt for username/token):
+   git clone https://github.com/your-username/aquaponicssensor.git
+
+GIT CONFIGURATION
+-----------------
+
+1. Set global Git configuration:
+   git config --global user.name "Your Name"
+   git config --global user.email "your-email@example.com"
+
+2. Test repository access:
+   cd aquaponicssensor
+   git status
+   git log --oneline -5
+
+3. Test pushing changes:
+   echo "Test from Pi" >> test.txt
+   git add test.txt
+   git commit -m "Test commit from Pi"
+   git push
+   rm test.txt
+   git add test.txt
+   git commit -m "Remove test file"
+   git push
+
+ENABLING GITHUB PAGES
+----------------------
+
+1. In your GitHub repository:
+   - Go to Settings → Pages
+   - Source: "Deploy from a branch"
+   - Branch: "main" or "master"
+   - Folder: "/ (root)"
+   - Click Save
+
+2. Your dashboard will be available at:
+   https://your-username.github.io/aquaponicssensor/
+
+3. Initial GitHub Pages deployment takes 5-10 minutes
+   - Check Actions tab for deployment status
+   - Green check mark indicates successful deployment
+
+4. Test the dashboard:
+   - Visit the GitHub Pages URL
+   - Should show aquaponics dashboard with charts
+   - Data loads from data.json in the repository
+
+AUTOMATIC DATA PUSHING
+-----------------------
+
+1. Environment variables for sensor logger:
+   export GIT_PUSH=1
+   
+   Or add to crontab:
+   */30 * * * * cd /home/pi/aquaponicssensor && GIT_PUSH=1 /home/pi/aquaponicssensor/venv/bin/python /home/pi/aquaponicssensor/pi/sensor_logger.py --once
+
+2. The sensor logger will automatically:
+   - Take sensor readings every 30 minutes
+   - Update data.json
+   - Git add, commit, and push changes
+   - Trigger GitHub Pages rebuild
+
+3. Dashboard updates within 1-2 minutes of push
+
+HARD REFRESH GITHUB PAGES
+--------------------------
+
+GitHub Pages caches aggressively. For immediate updates:
+
+1. Add query parameter to URL:
+   https://your-username.github.io/aquaponicssensor/?t=123456
+
+2. Use browser hard refresh:
+   - Chrome/Firefox: Ctrl+Shift+R
+   - Safari: Cmd+Shift+R
+
+3. The dashboard already includes cache-busting for data.json:
+   fetch('data.json?nocache=' + Date.now())
+
+FIREWALL CONFIGURATION
+----------------------
+
+If using firewall (recommended):
+
+1. Enable and configure UFW:
+   sudo ufw allow ssh
+   sudo ufw allow out 80
+   sudo ufw allow out 443
+   sudo ufw enable
+
+2. For local dashboard access (optional):
+   sudo ufw allow 8000
+   
+   Then serve locally:
+   cd /home/pi/aquaponicssensor
+   python3 -m http.server 8000
+
+NETWORKING TROUBLESHOOTING
+---------------------------
+
+1. Wi-Fi connection issues:
+   - Check signal strength: iwconfig
+   - Restart networking: sudo systemctl restart dhcpcd
+   - Check status: wpa_cli status
+
+2. GitHub connection issues:
+   - Test internet: ping google.com
+   - Test GitHub: ping github.com
+   - Check authentication: gh auth status
+
+3. SSH connection issues:
+   - Verify SSH is enabled: sudo systemctl status ssh
+   - Check firewall: sudo ufw status
+   - Try different SSH port if blocked
+
+REMOTE MONITORING SETUP
+------------------------
+
+For remote access to your Pi:
+
+1. Dynamic DNS (if dynamic IP):
+   - Use service like No-IP or DuckDNS
+   - Install client on Pi to update IP
+
+2. Port forwarding:
+   - Forward port 22 (SSH) on your router
+   - Use non-standard port for security (e.g., 2222)
+
+3. VPN access (most secure):
+   - Set up WireGuard or OpenVPN
+   - Access Pi through VPN tunnel
+
+BACKUP CONSIDERATIONS
+---------------------
+
+1. Backup SD card periodically:
+   - Use Win32DiskImager or dd command
+   - Store image file safely
+
+2. GitHub serves as data backup:
+   - data.json pushed automatically
+   - Sensor code in repository
+   - Configuration documented
+
+3. Monitor disk space:
+   df -h
+   
+   Clean logs if needed:
+   sudo journalctl --vacuum-time=7d
+
+SECURITY BEST PRACTICES
+-----------------------
+
+1. Change default credentials:
+   passwd  # Change user password
+   sudo passwd root  # Change root password
+
+2. Keep system updated:
+   sudo apt update && sudo apt upgrade -y
+
+3. SSH hardening:
+   sudo nano /etc/ssh/sshd_config
+   
+   Disable root login:
+   PermitRootLogin no
+   
+   Use key authentication only:
+   PasswordAuthentication no
+
+4. Fail2ban for SSH protection:
+   sudo apt install fail2ban
+   sudo systemctl enable fail2ban
+
+5. Regular security updates:
+   sudo apt install unattended-upgrades
+   sudo dpkg-reconfigure unattended-upgrades
