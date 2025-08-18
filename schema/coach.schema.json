@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aquaponics Water Coach",
+  "description": "Schema for AI-generated aquaponics coaching advice",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when advice was generated"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "watch", "alert"],
+      "description": "Overall system status"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of water quality"
+    },
+    "insights": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": ["ph", "tds", "temp"],
+            "description": "Which sensor metric this insight relates to"
+          },
+          "trend": {
+            "type": "string",
+            "description": "Observed trend in the data"
+          },
+          "risk": {
+            "type": "string",
+            "description": "Risk assessment for this metric"
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "Specific actionable recommendation"
+          }
+        },
+        "required": ["metric", "recommendation"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["status", "summary", "insights"],
+  "additionalProperties": false
+}
