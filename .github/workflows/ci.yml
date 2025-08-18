@@ -1,0 +1,304 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # Job 1: Code Quality and Linting
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy
+          pip install -r pi/requirements.txt
+
+      - name: Run ruff linting
+        run: ruff check pi/ tests/ scripts/
+
+      - name: Run black formatting check
+        run: black --check pi/ tests/ scripts/
+
+      - name: Run mypy type checking
+        run: mypy pi/ --ignore-missing-imports
+
+  # Job 2: Python Unit Tests
+  test-python:
+    name: Python Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov jsonschema
+          # Install runtime dependencies (may fail on older Python versions)
+          pip install -r pi/requirements.txt || echo "Some dependencies may not be available"
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v --cov=pi --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  # Job 3: Schema Validation
+  validate-schemas:
+    name: Validate JSON Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema pytest
+
+      - name: Validate data schema
+        run: python -c "
+          import json, jsonschema
+          with open('schema/data.schema.json') as f: 
+              schema = json.load(f)
+          jsonschema.Draft202012Validator.check_schema(schema)
+          print('✓ data.schema.json is valid')
+          "
+
+      - name: Validate coach schema
+        run: python -c "
+          import json, jsonschema
+          with open('schema/coach.schema.json') as f: 
+              schema = json.load(f)
+          jsonschema.Draft202012Validator.check_schema(schema)
+          print('✓ coach.schema.json is valid')
+          "
+
+      - name: Test sample data against schema
+        run: |
+          pytest tests/test_data_schema.py -v
+          pytest tests/test_coach_schema.py -v
+
+  # Job 4: End-to-End Tests
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Set up Python (for serving static files)
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Generate test data
+        run: |
+          python scripts/generate_dummy_data.py --realistic --days 7
+
+      - name: Install E2E dependencies
+        run: |
+          cd e2e
+          npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd e2e
+          npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: |
+          cd e2e
+          npm test
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
+
+  # Job 5: Integration Tests
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest jsonschema
+          pip install -r pi/requirements.txt || echo "Hardware dependencies may fail in CI"
+
+      - name: Test sensor logger (mock mode)
+        run: |
+          cd pi
+          MOCK_HARDWARE=1 python sensor_logger.py --once
+
+      - name: Test data generation
+        run: |
+          python scripts/generate_dummy_data.py --days 3 --realistic
+          test -f data.json
+          echo "✓ Data generation works"
+
+      - name: Test static server
+        run: |
+          python scripts/serve_static.py --port 8001 &
+          SERVER_PID=$!
+          sleep 3
+          curl -f http://localhost:8001/ > /dev/null
+          curl -f http://localhost:8001/data.json > /dev/null
+          kill $SERVER_PID
+          echo "✓ Static server works"
+
+      - name: Validate generated data
+        run: |
+          python -c "
+          import json, jsonschema
+          with open('schema/data.schema.json') as f:
+              schema = json.load(f)
+          with open('data.json') as f:
+              data = json.load(f)
+          jsonschema.validate(data, schema)
+          print('✓ Generated data validates against schema')
+          "
+
+  # Job 6: Security Scanning
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install bandit
+        run: pip install bandit[toml]
+
+      - name: Run security scan
+        run: bandit -r pi/ scripts/ -f json -o bandit-report.json || true
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  # Job 7: Build and Package
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: [lint, test-python, validate-schemas]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+  # Job 8: Deploy Documentation (on main branch only)
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build, e2e-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Generate sample data for demo
+        run: |
+          python scripts/generate_dummy_data.py --realistic --days 30
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: '.github,tests,e2e,scripts,pi,venv,.pytest_cache,__pycache__,.git*'
