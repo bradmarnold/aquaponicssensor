@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+test_data.json
+/scripts/test_data.json
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
