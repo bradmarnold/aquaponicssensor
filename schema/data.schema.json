@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aquaponics Sensor Data",
+  "description": "Schema for aquaponics sensor time series data",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "UTC timestamp in ISO 8601 format with Z suffix"
+      },
+      "ph": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "maximum": 14,
+        "description": "pH value (0-14 scale), null if sensor unavailable"
+      },
+      "tds": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "description": "Total Dissolved Solids in ppm, null if sensor unavailable"
+      },
+      "temp_c": {
+        "type": ["number", "null"],
+        "minimum": -10,
+        "maximum": 60,
+        "description": "Water temperature in Celsius, null if sensor unavailable"
+      }
+    },
+    "required": ["timestamp", "ph", "tds", "temp_c"],
+    "additionalProperties": false
+  }
+}

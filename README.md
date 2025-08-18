@@ -278,6 +278,9 @@ For serverless coaching, deploy Vercel function at `/api/coach` that:
 
 ### Testing
 ```bash
+# Complete setup with testing infrastructure
+make setup
+
 # Test sensor reading
 python3 pi/sensor_logger.py --once
 
@@ -288,9 +291,42 @@ python3 pi/coach.py
 python3 scripts/generate_dummy_data.py --realistic --days 7
 
 # Serve dashboard locally
-python3 -m http.server 8000
+make serve
 # Visit: http://localhost:8000
+
+# Run all tests
+make test
+
+# Run end-to-end tests
+make e2e
+
+# Run all quality checks
+make check
 ```
+
+### Development Infrastructure
+
+This project includes comprehensive development infrastructure:
+
+- **103 Unit Tests**: Comprehensive test suite covering all modules
+- **E2E Tests**: Playwright tests for dashboard functionality
+- **CI/CD Pipeline**: 8-job GitHub Actions workflow
+- **Code Quality**: Ruff linting, Black formatting, MyPy type checking
+- **Pre-commit Hooks**: Automated code quality enforcement
+- **JSON Schema Validation**: Data integrity guarantees
+- **Development Server**: Local testing with proper MIME types
+- **Makefile**: Streamlined development commands
+
+### Production Deployment
+
+For production deployment on Raspberry Pi:
+
+1. **Hardware Setup**: Follow `docs/Pi_Wiring_and_Setup.txt`
+2. **Network Setup**: Follow `docs/Connect_Pi_and_Repo.txt`
+3. **Testing**: Run `make sensor-test` to verify sensors
+4. **Data Generation**: Use `make data` to create sample data
+5. **Monitoring**: Enable cron job for automatic readings
+6. **Dashboard**: Deploy via GitHub Pages or local server
 
 ## License
 

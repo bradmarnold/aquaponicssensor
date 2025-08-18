@@ -74,7 +74,7 @@ def generate_realistic_reading(timestamp, base_values=None):
     temp_c = max(15.0, min(30.0, temp_c))
     
     return {
-        "timestamp": timestamp.isoformat() + "Z",
+        "timestamp": timestamp.isoformat().replace('+00:00', 'Z'),
         "ph": round(ph, 3),
         "tds": round(tds, 1),
         "temp_c": round(temp_c, 2)
@@ -91,7 +91,7 @@ def generate_zero_reading(timestamp):
         dict: Zero-valued sensor reading
     """
     return {
-        "timestamp": timestamp.isoformat() + "Z", 
+        "timestamp": timestamp.isoformat().replace('+00:00', 'Z'), 
         "ph": 0.0,
         "tds": 0.0,
         "temp_c": 0.0
