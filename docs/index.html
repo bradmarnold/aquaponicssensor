@@ -269,5 +269,101 @@
   // Auto-refresh every 30 minutes
   setInterval(()=>location.reload(), 30*60*1000);
 </script>
+
+<!-- aquaponics: force UTC daily averages for last 30d -->
+<script>
+(function(){
+  if (window.__aquap_daily_fix__) return; 
+  window.__aquap_daily_fix__ = true;
+
+  function toDayUTC(ts){
+    try { return new Date(ts).toISOString().slice(0,10); } catch(e){ return null; }
+  }
+
+  function buildDailyUTC(rows){
+    const sums = new Map(); // day -> {c, ph, tds, temp}
+    for (const r of rows){
+      const d = toDayUTC(r.timestamp);
+      if (!d) continue;
+      const v = sums.get(d) || {c:0, ph:0, tds:0, temp:0};
+      if (typeof r.ph === 'number')  v.ph  += r.ph;
+      if (typeof r.tds === 'number') v.tds += r.tds;
+      if (typeof r.temp_c === 'number') v.temp += r.temp_c;
+      v.c += 1;
+      sums.set(d, v);
+    }
+    // last 30 UTC days timeline
+    const now = new Date();
+    const labels = [];
+    const ph = [], tds = [], temp = [];
+    for (let i=29;i>=0;i--){
+      const d = new Date(Date.UTC(
+        now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-i
+      )).toISOString().slice(0,10);
+      labels.push(d);
+      const v = sums.get(d);
+      ph.push(v && v.c ? +(v.ph/v.c).toFixed(3) : null);
+      tds.push(v && v.c ? +(v.tds/v.c).toFixed(1) : null);
+      temp.push(v && v.c ? +(v.temp/v.c).toFixed(2) : null);
+    }
+    return {labels, ph, tds, temp};
+  }
+
+  // Hook fetch so we see data.json when your code loads it
+  const _fetch = window.fetch;
+  window.fetch = function(input, init){
+    const url = (typeof input === 'string') ? input : (input && input.url) || '';
+    const p = _fetch.call(this, input, init);
+    if (/data\.json/.test(url)){
+      p.then(r => r.clone().json().then(rows => {
+        // After charts exist, patch them once
+        setTimeout(() => {
+          try {
+            const d = buildDailyUTC(rows);
+            // Find canvases by card titles then update the Chart.js instance for each
+            function chartByCardTitle(sub){
+              const cards = Array.from(document.querySelectorAll('.card'));
+              for (const c of cards){
+                const h = c.querySelector('h3');
+                const cvs = c.querySelector('canvas');
+                if (h && cvs && h.textContent.toLowerCase().includes(sub)) {
+                  // Chart.js v3+: Chart.getChart(canvas) gives the instance
+                  const inst = window.Chart && window.Chart.getChart ? window.Chart.getChart(cvs) : null;
+                  if (inst) return inst;
+                }
+              }
+              return null;
+            }
+            const phChart   = chartByCardTitle('daily avg ph');
+            const tdsChart  = chartByCardTitle('daily avg tds');
+            const tmpChart  = chartByCardTitle('daily avg temp');
+
+            if (phChart){
+              phChart.data.labels = d.labels;
+              if (phChart.data.datasets[0]) phChart.data.datasets[0].data = d.ph;
+              phChart.update('none');
+            }
+            if (tdsChart){
+              tdsChart.data.labels = d.labels;
+              if (tdsChart.data.datasets[0]) tdsChart.data.datasets[0].data = d.tds;
+              tdsChart.update('none');
+            }
+            if (tmpChart){
+              tmpChart.data.labels = d.labels;
+              if (tmpChart.data.datasets[0]) tmpChart.data.datasets[0].data = d.temp;
+              tmpChart.update('none');
+            }
+          } catch (e) { console.warn('daily fix error:', e); }
+        }, 250); // let the page finish building charts
+      })).catch(()=>{});
+    }
+    return p;
+  };
+
+  // Ensure JSON fetches are always cache-busted
+  if (!window.nocache) window.nocache = u => u + (u.includes('?')?'&':'?') + 'v=' + Date.now();
+})();
+</script>
+
 </body>
 </html>
