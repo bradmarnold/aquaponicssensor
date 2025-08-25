@@ -1,252 +1,202 @@
+#!/usr/bin/env python3
 """
-High-level Sensor Interface for Aquaponics Monitoring
-=====================================================
+sensors.py - Hardware access for aquaponics sensors
 
-Provides a clean interface for reading pH, TDS, and temperature sensors.
-Uses the Hardware Abstraction Layer (HAL) and pure conversion functions.
+- pH via ADS1115 A0
+- TDS via ADS1115 A1
+- DS18B20 on GPIO4 (1-Wire)
+- Calibration via env or config.json
+
+Env (overrides config.json if present):
+  ADS1115_ADDR=0x48
+  ADC_CH_PH=0
+  ADC_CH_TDS=1
+  PH_M=-3.333
+  PH_B=12.5
+  TDS_SCALE=0.5           # ppm per millivolt (see note below)
+  TDS_ALPHA=0.02          # temperature coefficient per °C for compensation
+
+Config file (optional): ../config.json
+  {
+    "ph":  { "m": -3.333, "b": 12.5 },
+    "tds": { "scale": 0.5, "alpha": 0.02 }
+  }
+
+Notes:
+- TDS_SCALE is interpreted as ppm per mV after calibration.
+  Example: if 1.000 V should read ~500 ppm, SCALE ≈ 0.5 ppm/mV.
+- Temperature compensation uses EC25 ≈ EC / (1 + alpha*(T-25)).
 """
 
+from __future__ import annotations
+import json
 import os
+import glob
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from pathlib import Path
 
+# Try hardware libs; fall back to mock ONLY on ImportError
+USE_MOCK = False
 try:
-    from .hal import create_adc, create_temp_sensor, ADC, OneWireTemp
-    from .conversions import voltage_to_ph, voltage_to_tds, validate_sensor_range
+    import board, busio
+    import adafruit_ads1x15.ads1115 as ADS
+    from adafruit_ads1x15.analog_in import AnalogIn
 except ImportError:
-    # Handle running as script
-    from hal import create_adc, create_temp_sensor, ADC, OneWireTemp
-    from conversions import voltage_to_ph, voltage_to_tds, validate_sensor_range
+    USE_MOCK = True
 
 
-class AquaponicsSensors:
-    """High-level interface for aquaponics sensor readings."""
-    
-    def __init__(self, 
-                 adc_address: int = 0x48,
-                 ph_channel: int = 0,
-                 tds_channel: int = 1,
-                 ph_slope: float = -3.333,
-                 ph_intercept: float = 12.5,
-                 tds_multiplier: float = 0.5,
-                 mock: bool = False):
-        """Initialize sensor interface.
-        
-        Args:
-            adc_address: I2C address of ADS1115 ADC
-            ph_channel: ADC channel for pH sensor (0-3)
-            tds_channel: ADC channel for TDS sensor (0-3)
-            ph_slope: pH calibration slope
-            ph_intercept: pH calibration intercept
-            tds_multiplier: TDS conversion multiplier
-            mock: Use mock hardware for testing
-        """
-        self.adc_address = adc_address
-        self.ph_channel = ph_channel
-        self.tds_channel = tds_channel
-        self.ph_slope = ph_slope
-        self.ph_intercept = ph_intercept
-        self.tds_multiplier = tds_multiplier
-        
-        # Initialize hardware interfaces
-        self.adc: ADC = create_adc(adc_address, mock=mock)
-        self.temp_sensor: OneWireTemp = create_temp_sensor(mock=mock)
-        
-        # Sensor validation ranges
-        self.ph_range = (0.0, 14.0)
-        self.tds_range = (0.0, 5000.0)  # ppm
-        self.temp_range = (-10.0, 60.0)  # Celsius
-    
-    def read_ph(self) -> Optional[float]:
-        """Read pH value from sensor.
-        
-        Returns:
-            pH value (0.0-14.0), or None if reading failed
-        """
+REPO_ROOT = Path(__file__).parent.parent
+CONFIG_FILE = REPO_ROOT / "config.json"
+
+# ---------- Helpers ----------
+
+def _load_config():
+    cfg = {}
+    try:
+        if CONFIG_FILE.exists():
+            with open(CONFIG_FILE, "r") as f:
+                cfg = json.load(f) or {}
+    except Exception as e:
+        print(f"Warning: failed to read {CONFIG_FILE}: {e}")
+    return cfg
+
+def _get_env_or_cfg(cfg, path, default=None):
+    """
+    Lookup with env override. `path` like 'ph.m' or 'tds.scale'.
+    """
+    # Env overrides for well-known keys
+    if path == "ph.m":
+        v = os.getenv("PH_M", os.getenv("PH_SLOPE", None))
+        if v is not None: return float(v)
+    if path == "ph.b":
+        v = os.getenv("PH_B", os.getenv("PH_INTERCEPT", None))
+        if v is not None: return float(v)
+    if path == "tds.scale":
+        v = os.getenv("TDS_SCALE", os.getenv("TDS_MULTIPLIER", None))
+        if v is not None: return float(v)
+    if path == "tds.alpha":
+        v = os.getenv("TDS_ALPHA", None)
+        if v is not None: return float(v)
+
+    # From config.json
+    cur = cfg
+    for key in path.split("."):
+        if not isinstance(cur, dict) or key not in cur:
+            return default
+        cur = cur[key]
+    return cur
+
+def _read_ds18b20_temp_c() -> float | None:
+    # Find first DS18B20 device
+    try:
+        for dev in glob.glob("/sys/bus/w1/devices/28-*/w1_slave"):
+            with open(dev, "r") as f:
+                lines = f.read().strip().splitlines()
+            if len(lines) >= 2 and lines[0].endswith("YES"):
+                # ... t=24500
+                idx = lines[1].find("t=")
+                if idx != -1:
+                    t_milli = int(lines[1][idx+2:])
+                    return round(t_milli / 1000.0, 2)
+    except Exception as e:
+        print(f"Warning: DS18B20 read failed: {e}")
+    return None
+
+# ---------- Core class ----------
+
+class Sensors:
+    def __init__(self):
+        self.cfg = _load_config()
+
+        # Channels
+        self.adc_addr = int(os.getenv("ADS1115_ADDR", "0x48"), 16)
+        ch_ph  = int(os.getenv("ADC_CH_PH", "0"))
+        ch_tds = int(os.getenv("ADC_CH_TDS", "1"))
+        self.CH_MAP = None
+
+        # Calibration
+        self.ph_m = float(_get_env_or_cfg(self.cfg, "ph.m",  -3.333))  # rough default
+        self.ph_b = float(_get_env_or_cfg(self.cfg, "ph.b",   12.5))
+        self.tds_scale = float(_get_env_or_cfg(self.cfg, "tds.scale", 0.5))
+        self.tds_alpha = float(_get_env_or_cfg(self.cfg, "tds.alpha", 0.02))
+
+        self.temp_c = None
+
+        # Hardware init
+        self.use_mock = USE_MOCK
+        if not self.use_mock:
+            try:
+                self.i2c = busio.I2C(board.SCL, board.SDA)
+                self.ads = ADS.ADS1115(self.i2c, address=self.adc_addr)
+                self.CH_MAP = {0: ADS.P0, 1: ADS.P1, 2: ADS.P2, 3: ADS.P3}
+                self.ch_ph  = AnalogIn(self.ads, self.CH_MAP[ch_ph])
+                self.ch_tds = AnalogIn(self.ads, self.CH_MAP[ch_tds])
+            except Exception as e:
+                print(f"Warning: ADS1115 init failed ({e}). Using mock mode.")
+                self.use_mock = True
+
+        # Mock voltages if needed
+        if self.use_mock:
+            self.mock_ph_v  = 1.65   # ~mid-scale
+            self.mock_tds_v = 1.00
+            print("Warning: Using mock sensor values (no hardware)")
+
+    # ----- Reads -----
+
+    def read_ph_voltage(self) -> float | None:
         try:
-            voltage = self.adc.read_voltage(self.ph_channel)
-            ph = voltage_to_ph(voltage, self.ph_slope, self.ph_intercept)
-            
-            if ph is not None and validate_sensor_range(ph, *self.ph_range, "pH"):
-                return ph
-            
-            return None
-            
+            return round(self.ch_ph.voltage, 4) if not self.use_mock else self.mock_ph_v
         except Exception as e:
-            print(f"Error reading pH sensor: {e}")
+            print(f"Error reading pH voltage: {e}")
             return None
-    
-    def read_temperature(self) -> Optional[float]:
-        """Read water temperature from DS18B20 sensor.
-        
-        Returns:
-            Temperature in Celsius, or None if reading failed
-        """
+
+    def read_tds_voltage(self) -> float | None:
         try:
-            temp_c = self.temp_sensor.read_celsius()
-            
-            if temp_c is not None and validate_sensor_range(temp_c, *self.temp_range, "temperature"):
-                return round(temp_c, 2)
-            
-            return None
-            
+            return round(self.ch_tds.voltage, 4) if not self.use_mock else self.mock_tds_v
         except Exception as e:
-            print(f"Error reading temperature sensor: {e}")
+            print(f"Error reading TDS voltage: {e}")
             return None
-    
-    def read_tds(self, temp_c: Optional[float] = None) -> Optional[float]:
-        """Read TDS value from sensor with temperature compensation.
-        
-        Args:
-            temp_c: Water temperature for compensation. If None, reads from temp sensor.
-            
-        Returns:
-            TDS in ppm, or None if reading failed
-        """
-        try:
-            voltage = self.adc.read_voltage(self.tds_channel)
-            
-            # Get temperature for compensation
-            if temp_c is None:
-                temp_c = self.read_temperature()
-            
-            # Default to 25°C if no temperature available
-            if temp_c is None:
-                temp_c = 25.0
-            
-            tds = voltage_to_tds(voltage, temp_c, self.tds_multiplier)
-            
-            if tds is not None and validate_sensor_range(tds, *self.tds_range, "TDS"):
-                return tds
-            
+
+    def read_temp_c(self) -> float | None:
+        self.temp_c = _read_ds18b20_temp_c()
+        return self.temp_c
+
+    # ----- Calibration / conversion -----
+
+    def ph_from_voltage(self, v: float | None) -> float | None:
+        if v is None:
             return None
-            
-        except Exception as e:
-            print(f"Error reading TDS sensor: {e}")
+        # linear: pH = m*V + b
+        return round(self.ph_m * v + self.ph_b, 2)
+
+    def tds_from_voltage(self, v: float | None, temp_c: float | None) -> float | None:
+        if v is None:
             return None
-    
-    def read_all(self) -> Dict[str, Any]:
-        """Read all sensors and return as structured data.
-        
-        Returns:
-            Dictionary with timestamp and sensor readings
-        """
-        # Read temperature first for TDS compensation
-        temp_c = self.read_temperature()
-        
-        # Read other sensors
-        ph = self.read_ph()
-        tds = self.read_tds(temp_c)
-        
-        # Create reading with UTC timestamp
-        reading = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+        # basic proportional model with temp compensation to 25°C
+        # ppm_raw = (V * 1000 mV) * scale
+        ppm_raw = max(0.0, v) * 1000.0 * self.tds_scale
+        if temp_c is None:
+            return round(ppm_raw, 2)
+        comp = 1.0 + self.tds_alpha * (temp_c - 25.0)
+        ppm_25 = ppm_raw / comp
+        return round(ppm_25, 2)
+
+    # ----- Public API -----
+
+    def read_all(self) -> dict:
+        ts = datetime.now(timezone.utc).isoformat()
+        t  = self.read_temp_c()
+        v_ph  = self.read_ph_voltage()
+        v_tds = self.read_tds_voltage()
+        ph  = self.ph_from_voltage(v_ph)
+        tds = self.tds_from_voltage(v_tds, t)
+        return {
+            "timestamp": ts,
             "ph": ph,
             "tds": tds,
-            "temp_c": temp_c
+            "temp_c": t
         }
-        
-        return reading
-    
-    def test_sensors(self) -> Dict[str, Any]:
-        """Test all sensors and return diagnostic information.
-        
-        Returns:
-            Dictionary with sensor test results and diagnostics
-        """
-        results = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "adc_address": f"0x{self.adc_address:02x}",
-            "channels": {
-                "ph": self.ph_channel,
-                "tds": self.tds_channel
-            },
-            "calibration": {
-                "ph_slope": self.ph_slope,
-                "ph_intercept": self.ph_intercept,
-                "tds_multiplier": self.tds_multiplier
-            },
-            "sensors": {}
-        }
-        
-        # Test pH sensor
-        try:
-            ph_voltage = self.adc.read_voltage(self.ph_channel)
-            ph_value = self.read_ph()
-            results["sensors"]["ph"] = {
-                "voltage": ph_voltage,
-                "value": ph_value,
-                "status": "ok" if ph_value is not None else "error"
-            }
-        except Exception as e:
-            results["sensors"]["ph"] = {
-                "voltage": None,
-                "value": None,
-                "status": f"error: {e}"
-            }
-        
-        # Test temperature sensor
-        try:
-            temp_value = self.read_temperature()
-            results["sensors"]["temperature"] = {
-                "value": temp_value,
-                "status": "ok" if temp_value is not None else "error"
-            }
-        except Exception as e:
-            results["sensors"]["temperature"] = {
-                "value": None,
-                "status": f"error: {e}"
-            }
-        
-        # Test TDS sensor
-        try:
-            tds_voltage = self.adc.read_voltage(self.tds_channel)
-            tds_value = self.read_tds()
-            results["sensors"]["tds"] = {
-                "voltage": tds_voltage,
-                "value": tds_value,
-                "status": "ok" if tds_value is not None else "error"
-            }
-        except Exception as e:
-            results["sensors"]["tds"] = {
-                "voltage": None,
-                "value": None,
-                "status": f"error: {e}"
-            }
-        
-        return results
 
 
-def create_sensors_from_env() -> AquaponicsSensors:
-    """Create sensor interface using environment variables.
-    
-    Environment variables:
-        ADS1115_ADDR: I2C address (default: 0x48)
-        ADC_CH_PH: pH sensor channel (default: 0)
-        ADC_CH_TDS: TDS sensor channel (default: 1)
-        PH_SLOPE: pH calibration slope (default: -3.333)
-        PH_INTERCEPT: pH calibration intercept (default: 12.5)
-        TDS_MULTIPLIER: TDS conversion factor (default: 0.5)
-        MOCK_HARDWARE: Use mock sensors (default: 0)
-    
-    Returns:
-        Configured AquaponicsSensors instance
-    """
-    # Parse environment variables with defaults
-    adc_address = int(os.getenv("ADS1115_ADDR", "0x48"), 16)
-    ph_channel = int(os.getenv("ADC_CH_PH", "0"))
-    tds_channel = int(os.getenv("ADC_CH_TDS", "1"))
-    ph_slope = float(os.getenv("PH_SLOPE", "-3.333"))
-    ph_intercept = float(os.getenv("PH_INTERCEPT", "12.5"))
-    tds_multiplier = float(os.getenv("TDS_MULTIPLIER", "0.5"))
-    mock = os.getenv("MOCK_HARDWARE", "0") == "1"
-    
-    return AquaponicsSensors(
-        adc_address=adc_address,
-        ph_channel=ph_channel,
-        tds_channel=tds_channel,
-        ph_slope=ph_slope,
-        ph_intercept=ph_intercept,
-        tds_multiplier=tds_multiplier,
-        mock=mock
-    )
+def create_sensors_from_env() -> Sensors:
+    return Sensors()
