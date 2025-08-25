@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-25T04:46:33.122735+00:00",
+  "timestamp": "2025-08-25T04:54:51.156668+00:00",
   "status": "alert",
-  "summary": "Local coach based on last 7 days. Latest pH=6.721, TDS=1595.4 ppm, Temp=18.38 \u00b0C.",
+  "summary": "Local coach based on last 7 days. Latest pH=6.729, TDS=1600.5 ppm, Temp=18.31 \u00b0C.",
   "insights": [
     {
       "metric": "ph",
@@ -15,7 +15,7 @@
     },
     {
       "metric": "temp",
-      "trend": "cool",
+      "trend": "on target",
       "recommendation": "Keep ~22\u201328 \u00b0C for tilapia; use heater/chiller or shading as needed."
     }
   ]
