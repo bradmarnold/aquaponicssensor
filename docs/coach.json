@@ -5,18 +5,18 @@
     {
       "metric": "pH",
       "trend": "increasing",
-      "recommendation": "Maintain pH between 6.5 and 7.5. Consider adding pH buffers or adjusting feeding practices."
+      "recommendation": "Maintain pH between 6.5 and 7.5; consider adding pH buffers."
     },
     {
       "metric": "TDS",
       "trend": "increasing",
-      "recommendation": "Reduce TDS levels to below 1000 ppm. Consider water changes or reducing feed input."
+      "recommendation": "Reduce TDS levels; consider diluting with fresh water."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Increase water temperature closer to 24-28°C for optimal tilapia growth. Use heaters if necessary."
+      "recommendation": "Increase water temperature to optimal range (24-28°C) for tilapia growth."
     }
   ],
-  "timestamp": "2025-08-25T11:30:03.722688+00:00"
+  "timestamp": "2025-08-25T12:00:04.298786+00:00"
 }
