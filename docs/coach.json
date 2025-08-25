@@ -1,22 +1,22 @@
 {
-  "status": "watch",
-  "summary": "Water quality is within acceptable limits but shows signs of fluctuation that may affect plant and fish health.",
+  "status": "alert",
+  "summary": "Water quality parameters indicate potential stress for fish and plants.",
   "insights": [
     {
       "metric": "pH",
       "trend": "increasing",
-      "recommendation": "Monitor closely; aim to stabilize around 6.8-7.0."
+      "recommendation": "Maintain pH between 6.5 and 7.5; consider adding pH buffers."
     },
     {
       "metric": "TDS",
       "trend": "increasing",
-      "recommendation": "Consider diluting with fresh water to maintain optimal levels for tilapia and plants."
+      "recommendation": "Dilute water with fresh water to lower TDS; aim for 500-1500 ppm for optimal growth."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Ensure temperature remains stable; consider heating if it drops below 20°C."
+      "recommendation": "Monitor temperature; ensure it stays within 24-28°C for tilapia and optimal plant growth."
     }
   ],
-  "timestamp": "2025-08-25T13:00:03.978760+00:00"
+  "timestamp": "2025-08-25T13:30:03.754709+00:00"
 }
