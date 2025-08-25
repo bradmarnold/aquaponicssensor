@@ -1,6 +1,6 @@
 {
   "status": "alert",
-  "summary": "Local coach based on last 7 days. Latest pH=6.996, TDS=1596.1 ppm, Temp=18.38 \u00b0C.",
+  "summary": "Local coach based on last 7 days. Latest pH=6.994, TDS=1595.7 ppm, Temp=18.38 \u00b0C.",
   "insights": [
     {
       "metric": "ph",
@@ -18,5 +18,5 @@
       "recommendation": "Tilapia ~22\u201330 \u00b0C; your window set to 18\u201328 \u00b0C. Add heater/chiller or shading/aeration as needed."
     }
   ],
-  "timestamp": "2025-08-25T05:58:41.423435+00:00"
+  "timestamp": "2025-08-25T06:00:06.025061+00:00"
 }
