@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aquaponics Dashboard</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js?v=4.4.3"></script>
+  <style>
+    :root{
+      --bg:#f8fafc;             /* light background */
+      --card:#ffffff;           /* card surface */
+      --card-border:#e5e7eb;    /* subtle border */
+      --text:#0f172a;           /* main text */
+      --muted:#64748b;          /* secondary text */
+
+      /* series colors */
+      --ph:#e11d48;       /* rose-600 */
+      --ph-fill:#e11d4826;
+      --tds:#0284c7;      /* sky-600 */
+      --tds-fill:#0284c726;
+      --temp:#d97706;     /* amber-600 */
+      --temp-fill:#d9770626;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text); background:var(--bg); padding:24px;
+    }
+    header{display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; margin-bottom: 18px;}
+    h1{margin:0; font-size:28px; letter-spacing:0.3px}
+    .note{color:var(--muted); font-size:13px}
+    .bar{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .chip{
+      padding:8px 12px; border-radius:999px; background:#ffffff; border:1px solid var(--card-border);
+      font-size:13px; display:inline-flex; align-items:center; gap:8px;
+      box-shadow:0 6px 18px rgba(2,6,23,.08);
+    }
+    .dot{width:10px; height:10px; border-radius:999px; display:inline-block}
+    .dot.ph{background:var(--ph)} .dot.tds{background:var(--tds)} .dot.temp{background:var(--temp)}
+
+    h2{margin:22px 0 10px; font-size:18px; color:#111827; letter-spacing:.3px}
+    .grid{display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));}
+    .card{
+      background:var(--card); border:1px solid var(--card-border); border-radius:16px; padding:14px;
+      box-shadow:0 10px 30px rgba(2,6,23,.06);
+      min-height:320px; display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .card h3{margin:0 0 10px; font-size:14px; color:#1f2937; font-weight:600}
+
+    /* FIX: give charts a stable box; canvas fills it */
+    .chartbox{ position:relative; height:260px; width:100%; }
+    canvas{ display:block; width:100%; height:100%; }
+
+    footer{margin-top:26px; color:var(--muted); font-size:12px}
+    a{color:#0369a1}
+    .err{color:#b91c1c}
+
+    /* Water Coach card */
+    #coach{ position:fixed; right:16px; bottom:16px; z-index:50; max-width:360px;
+      background:#fff; border:1px solid var(--card-border); border-radius:12px;
+      box-shadow:0 10px 30px rgba(2,6,23,.10); padding:12px; font: 13px/1.4 Inter, system-ui;}
+    #coach .badge{ display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--card-border); margin-left:8px;}
+    #coach .badge.ok{ background:#e8f5e9; color:#166534; border-color:#bbf7d0;}
+    #coach .badge.watch{ background:#fff7ed; color:#a16207; border-color:#fde68a;}
+    #coach .badge.alert{ background:#fef2f2; color:#991b1b; border-color:#fecaca;}
+    #coach ul{ margin:6px 0 0; padding-left:18px;}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Aquaponics Sensor Dashboard</h1>
+      <div class="note">Live from <code>data.json</code> • Last refresh: <span id="ts"></span> • Auto refresh every 30 min</div>
+    </div>
+    <div class="bar" id="latestChips" aria-live="polite"></div>
+  </header>
+
+  <h2>Last 7 Days — Raw Readings</h2>
+  <div class="grid">
+    <div class="card"><h3>pH (raw)</h3><div class="chartbox"><canvas id="ph7"></canvas></div></div>
+    <div class="card"><h3>TDS (ppm, raw)</h3><div class="chartbox"><canvas id="tds7"></canvas></div></div>
+    <div class="card"><h3>Water Temp (°C, raw)</h3><div class="chartbox"><canvas id="temp7"></canvas></div></div>
+  </div>
+
+  <h2>Last 30 Days — Daily Averages</h2>
+  <div class="grid">
+    <div class="card"><h3>Daily Avg pH</h3><div class="chartbox"><canvas id="ph30"></canvas></div></div>
+    <div class="card"><h3>Daily Avg TDS (ppm)</h3><div class="chartbox"><canvas id="tds30"></canvas></div></div>
+    <div class="card"><h3>Daily Avg Temp (°C)</h3><div class="chartbox"><canvas id="temp30"></canvas></div></div>
+  </div>
+
+  <footer>
+    Keep at least 30–60 days of data on the Pi (<code>WINDOW_DAYS=60</code>) so daily-average charts stay full.
+  </footer>
+
+  <!-- Water Coach panel -->
+  <div id="coach" role="complementary" aria-label="Water Coach">
+    <div style="font-weight:600; margin-bottom:6px;">
+      Water Coach <span id="coach-status" class="badge">loading…</span>
+    </div>
+    <div id="coach-ts" style="color:#64748b; font-size:12px; margin-bottom:8px;">…</div>
+    <div id="coach-body">Loading advice…</div>
+  </div>
+
+  <script>
+    document.getElementById('ts').textContent = new Date().toLocaleString();
+
+    const MS_DAY = 24*60*60*1000;
+    const now = new Date();
+    const cutoff7  = new Date(now.getTime() - 7*MS_DAY);
+    const cutoff30 = new Date(now.getTime() - 30*MS_DAY);
+
+    const palette = {
+      ph:   { stroke:getCss('--ph'),   fill:getCss('--ph-fill') },
+      tds:  { stroke:getCss('--tds'),  fill:getCss('--tds-fill') },
+      temp: { stroke:getCss('--temp'), fill:getCss('--temp-fill') }
+    };
+
+    function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+    function fmt(v,dec=2){ return (v==null || isNaN(v)) ? '—' : Number(v).toFixed(dec); }
+    const iso = d => d.toISOString();
+
+    async function loadData(){
+      const url = 'data.json?nocache=' + Date.now();
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('Failed to load data.json');
+      const rows = await r.json();
+      // Normalize rows and map 0 → null so placeholder zeros don't affect charts
+      return rows.map(r=>({
+        t: new Date(r.timestamp),
+        ph:  (r.ph === 0 ? null : r.ph),
+        tds: (r.tds === 0 ? null : r.tds),  
+        temp:((r.temp_c ?? r.temp) === 0 ? null : (r.temp_c ?? r.temp))
+      })).filter(x=>!isNaN(x.t));
+    }
+
+    function showLatestChips(rows){
+      if(!rows.length) return;
+      const last = rows.reduce((a,b)=> a.t>b.t? a : b);
+      const el = document.getElementById('latestChips');
+      el.innerHTML = `
+        <span class="chip"><span class="dot ph"></span><strong>pH:</strong> ${fmt(last.ph,3)}</span>
+        <span class="chip"><span class="dot tds"></span><strong>TDS:</strong> ${fmt(last.tds,1)} ppm</span>
+        <span class="chip"><span class="dot temp"></span><strong>Temp:</strong> ${fmt(last.temp,2)} °C</span>
+      `;
+    }
+
+    function seriesLast7(rows){
+      const f = rows.filter(r=> r.t >= cutoff7).sort((a,b)=>a.t-b.t);
+      return {
+        labels: f.map(r=> iso(r.t)),
+        ph:  f.map(r=> r.ph),
+        tds: f.map(r=> r.tds),
+        temp:f.map(r=> r.temp),
+      };
+    }
+
+    function dailyAveragesLast30(rows){
+      const buckets = new Map(); // yyyy-mm-dd -> {sum,count} per metric
+      for(const r of rows){
+        if(r.t < cutoff30) continue;
+        const d = new Date(Date.UTC(r.t.getUTCFullYear(), r.t.getUTCMonth(), r.t.getUTCDate()));
+        const key = d.toISOString().slice(0,10);
+        if(!buckets.has(key)) buckets.set(key, {ph:{s:0,c:0}, tds:{s:0,c:0}, temp:{s:0,c:0}});
+        const b = buckets.get(key);
+        if(typeof r.ph  === 'number'){ b.ph.s  += r.ph;  b.ph.c++; }
+        if(typeof r.tds === 'number'){ b.tds.s += r.tds; b.tds.c++; }
+        if(typeof r.temp=== 'number'){ b.temp.s+= r.temp; b.temp.c++; }
+      }
+      const days = Array.from(buckets.keys()).sort();
+      const avg = (o,dec)=> o.c? +((o.s/o.c).toFixed(dec)) : null;
+      return {
+        labels:days,
+        ph:   days.map(k=> avg(buckets.get(k).ph,3)),
+        tds:  days.map(k=> avg(buckets.get(k).tds,1)),
+        temp: days.map(k=> avg(buckets.get(k).temp,2)),
+      };
+    }
+
+    // cache of chart instances by canvas id; prevents “stacking” on reload
+    const CHARTS = {};
+
+    function lineChart(canvasId, label, labels, data, colors){
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+
+      // If a chart already exists on this canvas, destroy it first
+      if (CHARTS[canvasId]) { CHARTS[canvasId].destroy(); CHARTS[canvasId] = null; }
+
+      const chart = new Chart(ctx, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[{
+            label, data,
+            borderColor: colors.stroke,
+            backgroundColor: (c)=>{
+              const {chart} = c; const area = chart.chartArea;
+              if(!area) return colors.fill;
+              const g = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+              g.addColorStop(0, colors.fill);
+              g.addColorStop(1, 'rgba(255,255,255,0)');
+              return g;
+            },
+            fill:true, borderWidth:2, pointRadius:0, tension:0.3
+          }]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          animation:{ duration:500, easing:'easeOutQuart' },
+          interaction:{ mode:'nearest', intersect:false },
+          scales:{
+            x:{ ticks:{ color:'#334155' }, grid:{ color:'rgba(2,6,23,0.06)' } },
+            y:{ ticks:{ color:'#334155' }, grid:{ color:'rgba(2,6,23,0.06)' } }
+          },
+          plugins:{
+            legend:{ labels:{ color:'#0f172a' }},
+            tooltip:{
+              backgroundColor:'#ffffff', titleColor:'#0f172a', bodyColor:'#0f172a',
+              borderColor:'#e5e7eb', borderWidth:1,
+              callbacks: { label:ctx => `${ctx.dataset.label}: ${ctx.parsed.y}` }
+            }
+          }
+        }
+      });
+
+      CHARTS[canvasId] = chart;
+      return chart;
+    }
+
+    async function loadCoach(){
+      const statusEl = document.getElementById('coach-status');
+      const tsEl = document.getElementById('coach-ts');
+      const bodyEl = document.getElementById('coach-body');
+      try{
+        // Try coach.json first
+        let r = await fetch('coach.json?nocache=' + Date.now());
+        let c = null;
+        
+        if (r.ok) {
+          c = await r.json();
+        } else {
+          // Fallback to Vercel endpoint if COACH_URL is configured
+          const coachUrl = window.COACH_URL || '/api/coach';
+          if (coachUrl && coachUrl !== '/api/coach') {
+            try {
+              r = await fetch(coachUrl + '?nocache=' + Date.now());
+              if (r.ok) {
+                c = await r.json();
+              }
+            } catch (fallbackError) {
+              console.log('Vercel endpoint also failed:', fallbackError);
+            }
+          }
+        }
+        
+        if (!c) throw new Error('no coach data available');
+        
+        const st = (c.status||'ok').toLowerCase();
+        statusEl.textContent = st;
+        statusEl.className = 'badge ' + st;
+        tsEl.textContent = `Updated: ${new Date(c.timestamp||Date.now()).toLocaleString()}`;
+        let html = '';
+        if (c.summary) html += `<p style="margin:0 0 6px">${c.summary}</p>`;
+        if (Array.isArray(c.insights) && c.insights.length){
+          html += '<ul>';
+          for (const i of c.insights.slice(0,3)) {
+            const m = (i.metric||'').toUpperCase();
+            const rec = i.recommendation || i.trend || '';
+            html += `<li><strong>${m}:</strong> ${rec}</li>`;
+          }
+          html += '</ul>';
+        }
+        bodyEl.innerHTML = html || 'No advice yet.';
+      }catch(e){
+        statusEl.textContent = 'watch'; statusEl.className = 'badge watch';
+        tsEl.textContent = 'Coach not ready. It will appear after the first Pi run.';
+        bodyEl.textContent = 'Waiting for coach.json...';
+      }
+    }
+
+    (async function init(){
+      try{
+        const rows = await loadData();
+        showLatestChips(rows);
+
+        const s7 = seriesLast7(rows);
+        lineChart('ph7',   'pH',               s7.labels, s7.ph,   {stroke:getCss('--ph'),   fill:getCss('--ph-fill')});
+        lineChart('tds7',  'TDS (ppm)',        s7.labels, s7.tds,  {stroke:getCss('--tds'),  fill:getCss('--tds-fill')});
+        lineChart('temp7', 'Water Temp (°C)',  s7.labels, s7.temp, {stroke:getCss('--temp'), fill:getCss('--temp-fill')});
+
+        const d30 = dailyAveragesLast30(rows);
+        lineChart('ph30',   'Daily Avg pH',        d30.labels, d30.ph,   {stroke:getCss('--ph'),   fill:getCss('--ph-fill')});
+        lineChart('tds30',  'Daily Avg TDS (ppm)', d30.labels, d30.tds,  {stroke:getCss('--tds'),  fill:getCss('--tds-fill')});
+        lineChart('temp30', 'Daily Avg Temp (°C)', d30.labels, d30.temp, {stroke:getCss('--temp'), fill:getCss('--temp-fill')});
+      }catch(err){
+        document.body.insertAdjacentHTML('beforeend',
+          `<p class="err">Error loading <code>data.json</code>: ${err.message}</p>`);
+      }
+      loadCoach();
+    })();
+
+    // Refresh page every 30 minutes (matches your logger cadence)
+    setInterval(()=> location.reload(), 30*60*1000);
+    // Refresh coach panel every 30 minutes
+    setInterval(loadCoach, 30*60*1000);
+  </script>
+</body>
+</html>

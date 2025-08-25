@@ -1,0 +1,22 @@
+{
+  "status": "alert",
+  "summary": "System parameters are outside acceptable ranges for optimal aquaponics operation.",
+  "insights": [
+    {
+      "metric": "ph",
+      "trend": "low and fluctuating",
+      "recommendation": "Increase pH with a buffer solution to stabilize within target range."
+    },
+    {
+      "metric": "tds",
+      "trend": "high",
+      "recommendation": "Perform a partial water change to reduce TDS levels."
+    },
+    {
+      "metric": "temp",
+      "trend": "low",
+      "recommendation": "Use a heater to maintain water temperature in the target range."
+    }
+  ],
+  "timestamp": "2025-08-25T02:31:59.904070+00:00"
+}
