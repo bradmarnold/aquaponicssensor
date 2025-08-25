@@ -1,22 +1,22 @@
 {
   "status": "alert",
-  "summary": "Critical pH and TDS levels require immediate attention.",
+  "summary": "Water quality metrics indicate significant issues requiring immediate attention.",
   "insights": [
     {
       "metric": "ph",
       "trend": "low average",
-      "recommendation": "Buffer up the pH to reach the ideal range."
+      "recommendation": "Increase pH using a buffering agent to reach ideal levels."
     },
     {
       "metric": "tds",
       "trend": "high average",
-      "recommendation": "Perform a partial water change to lower TDS levels."
+      "recommendation": "Dilute water with fresh water to lower TDS to the target range."
     },
     {
       "metric": "temp",
-      "trend": "acceptable range",
-      "recommendation": "Monitor temperature to ensure it remains within the ideal range."
+      "trend": "within range",
+      "recommendation": "Maintain current temperature; it's suitable for tilapia and plants."
     }
   ],
-  "timestamp": "2025-08-25T01:45:16.928753+00:00"
+  "timestamp": "2025-08-25T01:52:28.466446+00:00"
 }
