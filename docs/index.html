@@ -92,6 +92,7 @@
   </div>
 
 <script>
+  function nocache(u){ const n=Date.now(); return u+(u.includes("?")?"&":"?")+"v="+n; }
   // ---------- utilities ----------
   const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const MS_DAY = 24*60*60*1000;
