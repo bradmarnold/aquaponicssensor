@@ -1,13 +1,8 @@
 {
-  "timestamp": "2025-08-25T04:57:29.239695+00:00",
+  "timestamp": "2025-08-25T05:00:03.832202+00:00",
   "status": "alert",
-  "summary": "Local coach based on last 7 days. Latest pH=6.718, TDS=1605.6 ppm, Temp=18.25 \u00b0C.",
+  "summary": "Local coach based on last 7 days. Latest pH=None, TDS=1605.3 ppm, Temp=18.25 \u00b0C.",
   "insights": [
-    {
-      "metric": "ph",
-      "trend": "within target range",
-      "recommendation": "Calibrate probe with 7.00/4.01 buffers; adjust with pH up/down to 6.6\u20137.2."
-    },
     {
       "metric": "tds",
       "trend": "high",
