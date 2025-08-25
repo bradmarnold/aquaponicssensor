@@ -2026,5 +2026,11 @@
     "ph": null,
     "tds": null,
     "temp_c": 19.0
+  },
+  {
+    "timestamp": "2025-08-25T03:49:01.432084+00:00",
+    "ph": null,
+    "tds": null,
+    "temp_c": 19.0
   }
 ]
