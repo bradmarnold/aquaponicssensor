@@ -1,0 +1,22 @@
+{
+  "status": "alert",
+  "summary": "Critical adjustments are needed for pH and TDS levels.",
+  "insights": [
+    {
+      "metric": "ph",
+      "trend": "below target range",
+      "recommendation": "Buffer up the pH to reach the target range of 6.6\u20137.2."
+    },
+    {
+      "metric": "tds",
+      "trend": "above target range",
+      "recommendation": "Perform a partial water change to reduce TDS to the ideal range of 200\u2013500 ppm."
+    },
+    {
+      "metric": "temp",
+      "trend": "within target range",
+      "recommendation": "Maintain current temperature as it is suitable for both tilapia and plants."
+    }
+  ],
+  "timestamp": "2025-08-25T02:00:06.453398+00:00"
+}
