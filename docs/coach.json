@@ -1,22 +1,22 @@
 {
-  "status": "watch",
-  "summary": "Water quality is stable but TDS is elevated; monitor closely.",
+  "status": "ok",
+  "summary": "Water quality is within acceptable ranges for all metrics.",
   "insights": [
     {
-      "metric": "pH",
+      "metric": "ph",
       "trend": "stable",
-      "recommendation": "Maintain pH around 6.5-7.5 for optimal tilapia and plant health."
+      "recommendation": "Maintain current pH levels."
     },
     {
-      "metric": "TDS",
-      "trend": "elevated",
-      "recommendation": "Consider reducing feed or increasing water changes to lower TDS."
+      "metric": "tds",
+      "trend": "decreasing",
+      "recommendation": "Monitor TDS levels; consider adding nutrients."
     },
     {
       "metric": "temp",
       "trend": "stable",
-      "recommendation": "Maintain temperature between 25-30°C for optimal growth."
+      "recommendation": "Maintain current temperature."
     }
   ],
-  "timestamp": "2025-08-25T15:30:04.298464+00:00"
+  "timestamp": "2023-10-04T12:00:00Z"
 }
