@@ -109,6 +109,8 @@
   </div>
 
   <script>
+function fmtTs(s){return String(s).replace("T"," ").replace("Z","");}
+
     document.getElementById('ts').textContent = new Date().toLocaleString();
 
     const MS_DAY = 24*60*60*1000;
@@ -133,7 +135,7 @@
       const rows = await r.json();
       // Normalize rows and map 0 → null so placeholder zeros don't affect charts
       return rows.map(r=>({
-        t: new Date(r.timestamp),
+        t: new Date(fmtTs(r.timestamp)),
         ph:  (r.ph === 0 ? null : r.ph),
         tds: (r.tds === 0 ? null : r.tds),  
         temp:((r.temp_c ?? r.temp) === 0 ? null : (r.temp_c ?? r.temp))
