@@ -1,25 +1,22 @@
 {
-  "timestamp": "2025-08-18T03:25:00.000Z",
-  "status": "watch",
-  "summary": "System operating with mock data. pH levels appear low, TDS elevated beyond recommended range. Temperature stable.",
+  "status": "alert",
+  "summary": "Local coach based on last 7 days.",
   "insights": [
     {
       "metric": "ph",
-      "trend": "Low readings detected",
-      "risk": "Moderate - pH below optimal range",
-      "recommendation": "Check pH probe calibration and consider adding pH buffer solution to raise levels to 6.6-7.2 range"
+      "trend": "within range",
+      "recommendation": "Buffer toward 6.6\u20137.2; calibrate if drift."
     },
     {
       "metric": "tds",
-      "trend": "Elevated TDS levels",
-      "risk": "High - TDS above recommended freshwater range",
-      "recommendation": "Reduce nutrient concentration and increase water changes to bring TDS down to 200-500 ppm range"
+      "trend": "high average",
+      "recommendation": "Partial water change if high; remineralize if low."
     },
     {
       "metric": "temp",
-      "trend": "Stable temperature readings",
-      "risk": "Low - within acceptable range",
-      "recommendation": "Continue monitoring. Temperature is suitable for most freshwater fish species"
+      "trend": "low",
+      "recommendation": "Hold ~22\u201328\u00b0C for tilapia; adjust heater/chiller."
     }
-  ]
+  ],
+  "timestamp": "2025-08-25T04:26:19.618170+00:00"
 }
