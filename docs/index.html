@@ -54,6 +54,44 @@
     #coach .badge.alert{ background:#fef2f2; color:#991b1b; border-color:#fecaca;}
     #coach ul{ margin:6px 0 0; padding-left:18px;}
   </style>
+
+<!-- inject: utc-bucketing + cache-bust -->
+<script>
+(function(){
+  if (window.__aquap_patch__) return;  // idempotent
+  window.__aquap_patch__ = true;
+
+  // 1) Make any toLocaleDateString() return a UTC yyyy-mm-dd key
+  try {
+    const _orig = Date.prototype.toLocaleDateString;
+    Date.prototype.toLocaleDateString = function(){
+      try { return this.toISOString().slice(0,10); }
+      catch(e){ return _orig.call(this); }
+    };
+  } catch (e) {}
+
+  // 2) Always fetch fresh JSON for data.json / coach.json
+  try {
+    const _fetch = window.fetch.bind(window);
+    window.fetch = function(u, opts){
+      try {
+        if (typeof u === "string" &&
+            (u.endsWith("data.json") || u.endsWith("coach.json"))) {
+          const t = Date.now();
+          u = u + (u.includes("?") ? "&" : "?") + "v=" + t;
+        }
+      } catch(e) {}
+      return _fetch(u, opts);
+    };
+  } catch (e) {}
+
+  // 3) Hint windows (in case the page reads these globals)
+  window.RAW_WINDOW_DAYS = 7;
+  window.DAILY_WINDOW_DAYS = 30;
+})();
+</script>
+<!-- /inject -->
+
 </head>
 <body>
   <header>
