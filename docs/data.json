@@ -2110,5 +2110,17 @@
     "ph": null,
     "tds": null,
     "temp_c": 18.81
+  },
+  {
+    "timestamp": "2025-08-25T04:08:49.080084+00:00",
+    "ph": null,
+    "tds": null,
+    "temp_c": 18.75
+  },
+  {
+    "timestamp": "2025-08-25T04:09:03.640035+00:00",
+    "ph": null,
+    "tds": null,
+    "temp_c": 18.75
   }
 ]
