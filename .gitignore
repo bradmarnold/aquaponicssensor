@@ -29,4 +29,6 @@ test_data.json
 # Build artifacts
 dist/
 build/
-*.egg-info/
+*.egg-info/data.backup.*
+pi/hal.py.bak
+*.log
