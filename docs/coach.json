@@ -1,22 +1,22 @@
 {
   "status": "alert",
-  "summary": "Water quality parameters are outside optimal ranges for Blue Nile tilapia and plants.",
+  "summary": "Current water quality metrics indicate potential stress for Blue Nile tilapia due to high TDS and low temperature.",
   "insights": [
     {
       "metric": "pH",
-      "trend": "increasing",
-      "recommendation": "Maintain pH between 6.5 and 7.5. Consider adding pH buffers or adjusting feeding practices."
+      "trend": "stable",
+      "recommendation": "Maintain pH between 6.5 and 7.5 for optimal fish health."
     },
     {
       "metric": "TDS",
-      "trend": "increasing",
-      "recommendation": "Reduce TDS levels to below 1000 ppm. Consider water changes or reducing feed input."
+      "trend": "high",
+      "recommendation": "Reduce TDS levels; consider water changes or dilution to lower salinity."
     },
     {
       "metric": "temp",
-      "trend": "decreasing",
-      "recommendation": "Increase water temperature closer to 24-28°C for optimal tilapia growth."
+      "trend": "low",
+      "recommendation": "Increase water temperature to around 24-28°C for optimal growth of tilapia."
     }
   ],
-  "timestamp": "2025-08-25T09:30:04.362726+00:00"
+  "timestamp": "2025-08-25T10:00:03.882753+00:00"
 }
