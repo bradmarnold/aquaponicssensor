@@ -4,19 +4,19 @@
   "insights": [
     {
       "metric": "pH",
-      "trend": "increasing",
-      "recommendation": "Adjust pH to optimal range of 6.5-7.5 for tilapia and plants."
+      "trend": "stable",
+      "recommendation": "Maintain pH between 6.5 and 7.5. Consider adding pH adjusters to lower pH slightly."
     },
     {
       "metric": "TDS",
       "trend": "high",
-      "recommendation": "Reduce TDS levels to optimal range of 500-1500 ppm for tilapia and plants."
+      "recommendation": "Reduce TDS levels to below 1000 ppm. Consider diluting with fresh water or checking for excess nutrients."
     },
     {
       "metric": "temp",
-      "trend": "decreasing",
-      "recommendation": "Increase water temperature to optimal range of 24-28°C for tilapia growth."
+      "trend": "low",
+      "recommendation": "Increase water temperature to around 24-28°C for optimal growth of tilapia and plants."
     }
   ],
-  "timestamp": "2025-08-25T07:30:04.426786+00:00"
+  "timestamp": "2025-08-25T07:41:19.178896+00:00"
 }
