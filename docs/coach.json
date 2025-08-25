@@ -1,17 +1,22 @@
 {
-  "timestamp": "2025-08-25T05:05:51.225255+00:00",
   "status": "alert",
-  "summary": "Local coach based on last 7 days. Latest pH=None, TDS=1610.0 ppm, Temp=18.19 \u00b0C.",
+  "summary": "Local coach based on last 7 days. Latest pH=None, TDS=1615.4 ppm, Temp=18.12 \u00b0C.",
   "insights": [
+    {
+      "metric": "ph",
+      "trend": "no reading",
+      "recommendation": "Aim 6.6\u20137.2; calibrate with 7.00/4.01 buffers; use pH up/down slowly."
+    },
     {
       "metric": "tds",
       "trend": "high",
-      "recommendation": "If high: partial water change or dilute; if low: remineralize / add nutrients."
+      "recommendation": "If high: partial water change/dilute; if low: remineralize/add nutrients; verify probe K-factor."
     },
     {
       "metric": "temp",
-      "trend": "on target",
-      "recommendation": "Keep ~22\u201328 \u00b0C for tilapia; use heater/chiller or shading as needed."
+      "trend": "within range",
+      "recommendation": "Tilapia ~22\u201330 \u00b0C; your window set to 18\u201328 \u00b0C. Add heater/chiller or shading/aeration as needed."
     }
-  ]
+  ],
+  "timestamp": "2025-08-25T05:13:34.329813+00:00"
 }
