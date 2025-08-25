@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-08-18T03:25:00.000Z",
+  "status": "watch",
+  "summary": "System operating with mock data. pH levels appear low, TDS elevated beyond recommended range. Temperature stable.",
+  "insights": [
+    {
+      "metric": "ph",
+      "trend": "Low readings detected",
+      "risk": "Moderate - pH below optimal range",
+      "recommendation": "Check pH probe calibration and consider adding pH buffer solution to raise levels to 6.6-7.2 range"
+    },
+    {
+      "metric": "tds",
+      "trend": "Elevated TDS levels",
+      "risk": "High - TDS above recommended freshwater range",
+      "recommendation": "Reduce nutrient concentration and increase water changes to bring TDS down to 200-500 ppm range"
+    },
+    {
+      "metric": "temp",
+      "trend": "Stable temperature readings",
+      "risk": "Low - within acceptable range",
+      "recommendation": "Continue monitoring. Temperature is suitable for most freshwater fish species"
+    }
+  ]
+}
