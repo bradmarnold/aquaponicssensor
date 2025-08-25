@@ -10,13 +10,13 @@
     {
       "metric": "TDS",
       "trend": "increasing",
-      "recommendation": "Reduce TDS levels to below 1000 ppm for optimal fish health. Consider water changes or dilution."
+      "recommendation": "Reduce TDS levels to below 1000 ppm for optimal fish and plant health. Consider water changes or dilution."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Increase water temperature closer to 24-28°C for optimal growth of tilapia and plants."
+      "recommendation": "Increase water temperature to around 24-28°C for optimal growth of tilapia and plants."
     }
   ],
-  "timestamp": "2025-08-25T06:27:04.170766+00:00"
+  "timestamp": "2025-08-25T06:30:04.010747+00:00"
 }
