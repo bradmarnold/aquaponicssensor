@@ -9,14 +9,14 @@
     },
     {
       "metric": "TDS",
-      "trend": "stable",
-      "recommendation": "Keep TDS levels between 300-500 ppm for optimal growth."
+      "trend": "slight decrease",
+      "recommendation": "Monitor TDS; ensure it remains between 300-500 ppm."
     },
     {
       "metric": "temp",
       "trend": "stable",
-      "recommendation": "Maintain water temperature between 24-30°C."
+      "recommendation": "Keep temperature between 24-30°C for optimal growth."
     }
   ],
-  "timestamp": "2025-08-25T14:30:04.938325+00:00"
+  "timestamp": "2025-08-25T15:00:04.970279+00:00"
 }
