@@ -1,22 +1,22 @@
 {
-  "status": "watch",
-  "summary": "pH is below target range; temp is low end of safe range.",
+  "status": "alert",
+  "summary": "Critical pH and TDS levels require immediate attention.",
   "insights": [
     {
       "metric": "ph",
-      "trend": "below target",
-      "recommendation": "Buffer up to raise pH closer to ideal 6.9."
+      "trend": "low average",
+      "recommendation": "Buffer up the pH to reach the ideal range."
     },
     {
       "metric": "tds",
-      "trend": "within target",
-      "recommendation": "Maintain current TDS levels for optimal nutrient availability."
+      "trend": "high average",
+      "recommendation": "Perform a partial water change to lower TDS levels."
     },
     {
       "metric": "temp",
-      "trend": "low end of range",
-      "recommendation": "Consider adding a heater to stabilize water temperature."
+      "trend": "acceptable range",
+      "recommendation": "Monitor temperature to ensure it remains within the ideal range."
     }
   ],
-  "timestamp": "2023-10-04T12:00:00Z"
+  "timestamp": "2025-08-25T01:45:16.928753+00:00"
 }
