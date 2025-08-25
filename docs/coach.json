@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-25T05:00:03.832202+00:00",
+  "timestamp": "2025-08-25T05:01:56.729049+00:00",
   "status": "alert",
-  "summary": "Local coach based on last 7 days. Latest pH=None, TDS=1605.3 ppm, Temp=18.25 \u00b0C.",
+  "summary": "Local coach based on last 7 days. Latest pH=None, TDS=1610.0 ppm, Temp=18.19 \u00b0C.",
   "insights": [
     {
       "metric": "tds",
