@@ -1,22 +1,22 @@
 {
-  "status": "ok",
-  "summary": "Water quality is stable and within acceptable ranges for Blue Nile tilapia and the selected plants.",
+  "status": "watch",
+  "summary": "Water quality is stable but TDS is slightly elevated compared to the 7-day average.",
   "insights": [
     {
       "metric": "pH",
       "trend": "stable",
-      "recommendation": "Maintain pH between 6.5 and 7.5."
+      "recommendation": "Maintain current pH; ideal range for tilapia is 6.5-8.5."
     },
     {
       "metric": "TDS",
-      "trend": "slight decrease",
-      "recommendation": "Monitor TDS; ensure it remains between 300-500 ppm."
+      "trend": "increased",
+      "recommendation": "Consider partial water change to lower TDS levels; optimal range is 200-400 ppm."
     },
     {
       "metric": "temp",
       "trend": "stable",
-      "recommendation": "Keep temperature between 24-30°C for optimal growth."
+      "recommendation": "Maintain temperature; ideal range for tilapia is 25-30°C."
     }
   ],
-  "timestamp": "2025-08-25T15:00:04.970279+00:00"
+  "timestamp": "2025-08-25T15:09:07.082378+00:00"
 }
