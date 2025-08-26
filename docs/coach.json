@@ -1,23 +1,23 @@
 {
   "status": "watch",
-  "summary": "Water quality is stable but requires monitoring due to slight pH deviation and temperature drop.",
+  "summary": "Water quality is stable but pH is slightly below optimal range for tilapia.",
   "insights": [
     {
       "metric": "pH",
-      "trend": "slight decrease",
-      "recommendation": "Maintain pH between 6.5 and 7.5; consider adding pH buffer if it drops further."
+      "trend": "decreasing",
+      "recommendation": "Consider adding a buffer to stabilize pH closer to 7.5."
     },
     {
       "metric": "TDS",
-      "trend": "slight increase",
-      "recommendation": "Monitor TDS levels; ensure they remain below 500 ppm for optimal fish and plant health."
+      "trend": "increasing",
+      "recommendation": "Monitor TDS levels; consider water changes if it approaches 400 ppm."
     },
     {
       "metric": "temp",
-      "trend": "decrease",
-      "recommendation": "Aim to maintain temperature around 28\u00b0C; consider heating if it drops further."
+      "trend": "decreasing",
+      "recommendation": "Maintain temperature around 28\u00b0C for optimal growth."
     }
   ],
-  "timestamp": "2025-08-26T13:00:06.918059+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.047 / 7.021 / 7.08 (trend: down)\n\u2022 TDS avg/min/max: 308.704 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 28.631 / 26.5 / 30.06 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-26T13:30:04.971144+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.046 / 7.021 / 7.08 (trend: down)\n\u2022 TDS avg/min/max: 308.829 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 28.584 / 26.31 / 30.06 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
