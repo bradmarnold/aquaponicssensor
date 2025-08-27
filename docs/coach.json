@@ -4,20 +4,20 @@
   "insights": [
     {
       "metric": "pH",
-      "trend": "stable",
-      "recommendation": "Maintain pH around 6.8-7.2 for optimal tilapia and plant health."
+      "trend": "slight increase",
+      "recommendation": "Maintain pH around 6.5-7.5 for optimal tilapia and plant health."
     },
     {
       "metric": "TDS",
-      "trend": "decreasing",
-      "recommendation": "Monitor TDS levels; consider adjusting feeding or water changes if it drops significantly."
+      "trend": "slight decrease",
+      "recommendation": "Monitor TDS levels; ensure they remain suitable for both fish and plants."
     },
     {
       "metric": "temp",
-      "trend": "decreasing",
-      "recommendation": "Ensure water temperature remains between 24-28\u00b0C for optimal growth."
+      "trend": "decrease",
+      "recommendation": "Aim to keep temperature between 24-28\u00b0C for optimal growth."
     }
   ],
-  "timestamp": "2025-08-27T18:30:04.678189+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.04 / 7.016 / 7.08 (trend: up)\n\u2022 TDS avg/min/max: 312.22 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.153 / 24.19 / 30.06 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-27T19:00:04.618019+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.04 / 7.016 / 7.08 (trend: up)\n\u2022 TDS avg/min/max: 312.155 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.139 / 24.19 / 30.06 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
