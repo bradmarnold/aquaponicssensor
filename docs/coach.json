@@ -1,23 +1,23 @@
 {
   "status": "watch",
-  "summary": "Water quality is stable but temperature is below optimal range for Blue Nile tilapia.",
+  "summary": "Water quality is stable but temperature is lower than average, which may affect fish and plant growth.",
   "insights": [
     {
       "metric": "pH",
       "trend": "stable",
-      "recommendation": "Maintain pH between 6.5 and 7.5."
+      "recommendation": "Maintain current pH levels; ideal range for tilapia is 6.5-8.5."
     },
     {
       "metric": "TDS",
       "trend": "stable",
-      "recommendation": "Monitor TDS; ideal range is 300-500 ppm."
+      "recommendation": "Monitor TDS; ensure it remains within 300-500 ppm for optimal growth."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Increase water temperature to 26-30\u00b0C for optimal tilapia growth."
+      "recommendation": "Increase water temperature to around 26-28\u00b0C for optimal tilapia growth."
     }
   ],
-  "timestamp": "2025-08-29T18:30:04.934122+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.04 / 7.016 / 7.088 (trend: up)\n\u2022 TDS avg/min/max: 312.747 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.261 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-29T19:00:04.336361+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.04 / 7.016 / 7.088 (trend: up)\n\u2022 TDS avg/min/max: 312.803 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.249 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
