@@ -1,23 +1,23 @@
 {
   "status": "watch",
-  "summary": "Water quality is stable but temperature is slightly below optimal for tilapia growth.",
+  "summary": "Water quality is stable but temperature is below optimal range for Blue Nile tilapia.",
   "insights": [
     {
       "metric": "pH",
       "trend": "stable",
-      "recommendation": "Maintain pH between 6.5 and 7.5 for optimal tilapia and plant health."
+      "recommendation": "Maintain pH around 6.8 to 7.2 for optimal fish health."
     },
     {
       "metric": "TDS",
       "trend": "stable",
-      "recommendation": "Monitor TDS; ensure it remains within 300-500 ppm for optimal nutrient availability."
+      "recommendation": "Monitor TDS; aim for 300-500 ppm for optimal plant growth."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Increase water temperature closer to 28-30\u00b0C for optimal tilapia growth."
+      "recommendation": "Increase water temperature to 26-30\u00b0C for optimal tilapia growth."
     }
   ],
-  "timestamp": "2025-08-29T12:30:04.006069+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.041 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 312.01 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.413 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-29T13:00:04.934075+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.041 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 312.043 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.402 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
