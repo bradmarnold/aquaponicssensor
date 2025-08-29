@@ -5,7 +5,7 @@
     {
       "metric": "pH",
       "trend": "slightly decreasing",
-      "recommendation": "Consider adding pH buffers to maintain optimal range (6.5-7.5) for tilapia."
+      "recommendation": "Consider adding pH buffers to maintain optimal range (6.5-8.5) for tilapia."
     },
     {
       "metric": "TDS",
@@ -18,6 +18,6 @@
       "recommendation": "Maintain temperature between 25-30\u00b0C for optimal tilapia health."
     }
   ],
-  "timestamp": "2025-08-29T06:00:04.711813+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.043 / 7.016 / 7.088 (trend: up)\n\u2022 TDS avg/min/max: 311.553 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.49 / 24.19 / 30.44 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-29T06:30:04.807828+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.042 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 311.589 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.49 / 24.19 / 30.44 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
