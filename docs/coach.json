@@ -1,23 +1,23 @@
 {
   "status": "watch",
-  "summary": "Water quality parameters are stable but pH is slightly below optimal range for tilapia.",
+  "summary": "Water quality is stable but temperature is below optimal range for tilapia growth.",
   "insights": [
     {
       "metric": "pH",
-      "trend": "slightly decreasing",
-      "recommendation": "Consider increasing pH to optimal range (6.5-7.5) using calcium carbonate."
+      "trend": "stable",
+      "recommendation": "Maintain pH between 6.5 and 7.5 for optimal fish and plant health."
     },
     {
       "metric": "TDS",
       "trend": "increasing",
-      "recommendation": "Monitor TDS levels; ensure they remain below 500 ppm for tilapia health."
+      "recommendation": "Monitor TDS levels; consider water changes if it approaches 400 ppm."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Maintain temperature around 26-30\u00b0C for optimal growth of tilapia and plants."
+      "recommendation": "Increase water temperature to 26-30\u00b0C for optimal tilapia growth."
     }
   ],
-  "timestamp": "2025-08-30T06:30:04.678197+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.039 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 314.25 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.04 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-30T07:00:04.646171+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.039 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 314.318 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 27.03 / 24.19 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
