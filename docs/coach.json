@@ -1,6 +1,6 @@
 {
   "status": "watch",
-  "summary": "Water quality is stable but temperature is below optimal range for tilapia.",
+  "summary": "Current water quality is stable but slightly below optimal temperature for Blue Nile tilapia.",
   "insights": [
     {
       "metric": "pH",
@@ -10,14 +10,14 @@
     {
       "metric": "TDS",
       "trend": "increasing",
-      "recommendation": "Monitor TDS levels; consider water changes if TDS rises significantly."
+      "recommendation": "Monitor TDS levels; consider water changes if it approaches 400 ppm."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Increase water temperature to 25-30\u00b0C for optimal tilapia growth."
+      "recommendation": "Increase water temperature to around 26-28\u00b0C for optimal fish growth."
     }
   ],
-  "timestamp": "2025-08-31T10:30:03.846036+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.036 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 317.375 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 26.464 / 23.56 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-08-31T11:00:04.646192+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.036 / 7.016 / 7.088 (trend: down)\n\u2022 TDS avg/min/max: 317.423 / 295.1 / 347.6 ppm (trend: down)\n\u2022 Temp avg/min/max: 26.454 / 23.56 / 30.44 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
