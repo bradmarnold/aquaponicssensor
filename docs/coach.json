@@ -1,23 +1,23 @@
 {
-  "status": "watch",
-  "summary": "Water quality is stable but requires monitoring due to slight fluctuations in temperature and TDS.",
+  "status": "ok",
+  "summary": "Water quality is stable and within acceptable ranges for Blue Nile tilapia and the selected plants.",
   "insights": [
     {
       "metric": "pH",
       "trend": "stable",
-      "recommendation": "Maintain pH between 6.5 and 7.5 for optimal tilapia and plant health."
+      "recommendation": "Maintain pH between 6.5 and 7.5."
     },
     {
       "metric": "TDS",
-      "trend": "slight increase",
-      "recommendation": "Monitor TDS levels; consider water changes if it exceeds 400 ppm."
+      "trend": "stable",
+      "recommendation": "Keep TDS levels between 300-450 ppm for optimal growth."
     },
     {
       "metric": "temp",
       "trend": "decreasing",
-      "recommendation": "Ensure temperature remains between 24\u00b0C and 28\u00b0C for tilapia growth."
+      "recommendation": "Monitor temperature; maintain between 24-28\u00b0C for tilapia."
     }
   ],
-  "timestamp": "2025-09-03T15:00:05.035397+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.034 / 7.014 / 7.088 (trend: up)\n\u2022 TDS avg/min/max: 323.711 / 300.3 / 331.8 ppm (trend: up)\n\u2022 Temp avg/min/max: 25.715 / 23.56 / 30.44 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-09-03T15:30:04.136122+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.034 / 7.014 / 7.088 (trend: up)\n\u2022 TDS avg/min/max: 323.743 / 300.3 / 331.8 ppm (trend: up)\n\u2022 Temp avg/min/max: 25.716 / 23.56 / 30.44 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
