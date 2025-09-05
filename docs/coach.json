@@ -10,14 +10,14 @@
     {
       "metric": "TDS",
       "trend": "stable",
-      "recommendation": "Continue monitoring; ensure TDS remains within acceptable range for both fish and plants."
+      "recommendation": "Continue monitoring; ensure TDS remains within 300-500 ppm for optimal plant growth."
     },
     {
       "metric": "temp",
       "trend": "increasing",
-      "recommendation": "Monitor temperature closely; ensure it stays within 24-30\u00b0C for optimal growth."
+      "recommendation": "Maintain temperature between 24-30\u00b0C; consider cooling methods if temperatures rise further."
     }
   ],
-  "timestamp": "2025-09-05T18:00:04.839677+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.035 / 7.014 / 7.106 (trend: up)\n\u2022 TDS avg/min/max: 328.022 / 307.8 / 332.5 ppm (trend: down)\n\u2022 Temp avg/min/max: 25.414 / 23.56 / 28.56 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-09-05T18:30:04.360061+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.035 / 7.014 / 7.106 (trend: up)\n\u2022 TDS avg/min/max: 328.01 / 307.8 / 332.5 ppm (trend: down)\n\u2022 Temp avg/min/max: 25.422 / 23.56 / 28.56 \u00b0C (trend: up)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
