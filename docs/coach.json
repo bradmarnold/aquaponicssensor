@@ -1,23 +1,23 @@
 {
-  "status": "ok",
-  "summary": "Water quality is within acceptable ranges for all metrics.",
+  "status": "watch",
+  "summary": "Water quality is stable but requires monitoring due to slight pH fluctuation.",
   "insights": [
     {
-      "metric": "ph",
-      "trend": "stable",
-      "recommendation": "Maintain current pH levels."
+      "metric": "pH",
+      "trend": "slightly decreasing",
+      "recommendation": "Maintain pH between 6.5 and 7.5; consider adding pH buffers if it drops further."
     },
     {
-      "metric": "tds",
-      "trend": "stable",
-      "recommendation": "Monitor TDS; levels are acceptable."
+      "metric": "TDS",
+      "trend": "slightly increasing",
+      "recommendation": "Monitor TDS levels; ensure they remain below 500 ppm for optimal plant growth."
     },
     {
       "metric": "temp",
-      "trend": "increasing",
-      "recommendation": "Ensure temperature does not exceed 28.0\u00b0C."
+      "trend": "slightly decreasing",
+      "recommendation": "Maintain temperature between 24\u00b0C and 28\u00b0C; consider heating if it drops below 24\u00b0C."
     }
   ],
-  "timestamp": "2023-10-05T12:00:00Z",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.035 / 7.008 / 7.106 (trend: down)\n\u2022 TDS avg/min/max: 329.953 / 307.8 / 338.7 ppm (trend: up)\n\u2022 Temp avg/min/max: 25.24 / 21.5 / 29.62 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-09-08T02:30:04.910487+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.035 / 7.008 / 7.106 (trend: down)\n\u2022 TDS avg/min/max: 329.983 / 307.8 / 338.7 ppm (trend: up)\n\u2022 Temp avg/min/max: 25.232 / 21.5 / 29.62 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
