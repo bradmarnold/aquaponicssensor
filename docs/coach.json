@@ -1,23 +1,23 @@
 {
   "status": "ok",
-  "summary": "Water quality is stable and within acceptable ranges for Blue Nile tilapia and the selected plants.",
+  "summary": "Water quality is stable and within optimal ranges for Blue Nile tilapia and the selected plants.",
   "insights": [
     {
       "metric": "pH",
       "trend": "stable",
-      "recommendation": "Maintain pH between 6.5 and 7.5; current level is optimal."
+      "recommendation": "Maintain pH between 6.5 and 7.5."
     },
     {
       "metric": "TDS",
       "trend": "slightly increasing",
-      "recommendation": "Monitor TDS; ensure it stays below 500 ppm for optimal growth."
+      "recommendation": "Monitor TDS; ensure it stays below 500 ppm."
     },
     {
       "metric": "temp",
-      "trend": "increasing",
-      "recommendation": "Maintain temperature between 24\u00b0C and 30\u00b0C; current level is acceptable."
+      "trend": "slightly increasing",
+      "recommendation": "Keep temperature between 24\u00b0C and 30\u00b0C for optimal growth."
     }
   ],
-  "timestamp": "2025-09-12T04:30:04.658604+00:00",
-  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.032 / 7.005 / 7.113 (trend: down)\n\u2022 TDS avg/min/max: 335.514 / 310.0 / 342.7 ppm (trend: up)\n\u2022 Temp avg/min/max: 23.914 / 20.94 / 29.62 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
+  "timestamp": "2025-09-12T05:00:04.878518+00:00",
+  "extended_notes": "Last 7 days overview:\n\u2022 pH avg/min/max: 7.032 / 7.005 / 7.113 (trend: down)\n\u2022 TDS avg/min/max: 335.541 / 310.0 / 342.7 ppm (trend: up)\n\u2022 Temp avg/min/max: 23.909 / 20.94 / 29.62 \u00b0C (trend: down)\n\nActions (if needed):\n\u2022 pH: keep ~6.6\u20137.2; calibrate probe with 7.00/4.01; adjust slowly.\n\u2022 TDS: seedlings ~200\u2013500 ppm; higher OK for mature plants; water-change to reduce.\n\u2022 Temp: hold in target band for your fish/plants; heater/chiller/aeration as needed."
 }
